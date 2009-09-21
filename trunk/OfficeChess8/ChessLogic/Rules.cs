@@ -83,7 +83,7 @@ namespace ChessLogic
                     GameData.g_CurrentGameState[TargetSquare] = GameData.g_CurrentGameState[CurrentSquare];
                     GameData.g_CurrentGameState[CurrentSquare] = null;
 
-                    // updtae the pieces
+                    // update the pieces
                     Update();
 
                     // inc num moves

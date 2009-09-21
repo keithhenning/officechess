@@ -6,6 +6,13 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Globals
 {
+	// store some version information
+	public enum VersionInformation : uint
+	{
+		GAME_VERSION = 1,
+		SAVEGAME_FILEVERSION = 101,
+	}
+
     // defines the actual vlaue of a piece
     public enum PValue : int
     {
@@ -125,7 +132,8 @@ namespace Globals
 	[Serializable]
 	public class SaveData
 	{
-		public PrototypePiece[] g_CurrentGameState = new PrototypePiece[64];
+		public uint FileVersion = (uint)VersionInformation.SAVEGAME_FILEVERSION;
+		public PrototypePiece[] CurrentGameState = new PrototypePiece[64];
 		public PColor ColorMoving = PColor.White;
 	}
 
@@ -163,7 +171,7 @@ namespace Globals
 			{
 				// create new save data
 				SaveData sd = new SaveData();
-				sd.g_CurrentGameState = g_CurrentGameState;
+				sd.CurrentGameState = g_CurrentGameState;
 				sd.ColorMoving = g_ColorMoving;
 
 				// save to file
@@ -171,6 +179,7 @@ namespace Globals
 				FileStream fs = new FileStream(FileName, FileMode.Create);
 				bf.Serialize(fs, sd);
 				fs.Close();
+				Console.WriteLine("Successfully saved game to: " + FileName);
 			}
 			catch
 			{
@@ -194,13 +203,22 @@ namespace Globals
 				sd = (SaveData)bf.Deserialize(fs);
 				fs.Close();
 
-				// restore savegame data
-				GameData.g_CurrentGameState = sd.g_CurrentGameState;
-				GameData.g_ColorMoving = sd.ColorMoving;
+				// check version number
+				if (sd.FileVersion == (uint)VersionInformation.SAVEGAME_FILEVERSION)
+				{
+					// restore savegame data
+					GameData.g_CurrentGameState = sd.CurrentGameState;
+					GameData.g_ColorMoving = sd.ColorMoving;
+					Console.WriteLine("Successfully loaded saved game: " + FileName);
+				}
+				else
+				{
+					Console.WriteLine("ERROR: unable to open file: " + FileName + ", incorrect save game file version...");
+				}
 			}
 			catch
 			{
-				Console.WriteLine("ERROR: unable to open file..." + FileName);
+				Console.WriteLine("ERROR: unable to open file: " + FileName);
 			}
 
 			return true;
