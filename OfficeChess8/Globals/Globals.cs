@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Globals
 {
@@ -43,6 +45,7 @@ namespace Globals
 	}
 
 	// defines the abstract class for a chess piece
+	[Serializable]
 	abstract public class PrototypePiece
 	{
 		//////////////////////////////////////////////////////////////////////////
@@ -118,6 +121,14 @@ namespace Globals
 		#endregion
 	}
 
+	// holds all global gamedata
+	[Serializable]
+	public class SaveData
+	{
+		public PrototypePiece[] g_CurrentGameState = new PrototypePiece[64];
+		public PColor ColorMoving = PColor.White;
+	}
+
 	static public class GameData
 	{
 		// current gamestate
@@ -130,7 +141,7 @@ namespace Globals
 		static public List<int> g_ValidMovesWhite = new List<int>();
 		static public List<int> g_ValidMovesBlack = new List<int>();
 
-		static public PColor ColorMoving = PColor.White;
+		static public PColor g_ColorMoving = PColor.White;
 
 		// classic starting positions 
 		static public sbyte[] g_StartingPositions = 
@@ -144,6 +155,56 @@ namespace Globals
 			-1, -1, -1, -1, -1, -1, -1, -1,
 			-6, -2, -5, -7, -3, -5, -2, -6,
 		};
+
+		// saves current game state to file
+		static public bool SaveToFile(String FileName)
+		{
+			try
+			{
+				// create new save data
+				SaveData sd = new SaveData();
+				sd.g_CurrentGameState = g_CurrentGameState;
+				sd.ColorMoving = g_ColorMoving;
+
+				// save to file
+				BinaryFormatter bf = new BinaryFormatter();
+				FileStream fs = new FileStream(FileName, FileMode.Create);
+				bf.Serialize(fs, sd);
+				fs.Close();
+			}
+			catch
+			{
+				Console.WriteLine("ERROR: unable to save file..." + FileName);
+			}
+
+			return true;
+		}
+
+		// loads game state from file
+		static public bool LoadFromFile(String FileName)
+		{
+			try
+			{
+				// create new savedata instance
+				SaveData sd = new SaveData();
+
+				// load file
+				BinaryFormatter bf = new BinaryFormatter();
+				FileStream fs = new FileStream(FileName, FileMode.Open);
+				sd = (SaveData)bf.Deserialize(fs);
+				fs.Close();
+
+				// restore savegame data
+				GameData.g_CurrentGameState = sd.g_CurrentGameState;
+				GameData.g_ColorMoving = sd.ColorMoving;
+			}
+			catch
+			{
+				Console.WriteLine("ERROR: unable to open file..." + FileName);
+			}
+
+			return true;
+		}
     }
 
     // global helper functions

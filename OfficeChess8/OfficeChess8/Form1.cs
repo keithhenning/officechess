@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using Globals;
 
 namespace OfficeChess8
 {
@@ -37,6 +38,16 @@ namespace OfficeChess8
 			bool bMoveAllowed = this.ChessRules.DoMove(CurrSquare, TargetSquare);
 
 			Console.WriteLine( "The rules says... " + ((bMoveAllowed==true) ? "allowed :-)" : "not allowed :-(") );
+		}
+
+		private void button1_Click(object sender, EventArgs e)
+		{
+			GameData.SaveToFile("blah.dat");
+		}
+
+		private void button2_Click(object sender, EventArgs e)
+		{
+			GameData.LoadFromFile("blah.dat");
 		}
 	}
 }

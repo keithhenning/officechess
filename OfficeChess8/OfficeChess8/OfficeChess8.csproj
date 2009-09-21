@@ -77,6 +77,10 @@
       <Project>{9B147EB4-F48D-4EF3-A51C-77A260438B30}</Project>
       <Name>ChessLogic</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Globals\Globals.csproj">
+      <Project>{A69486EC-48A2-42FB-BF2E-428DC452AD0B}</Project>
+      <Name>Globals</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
