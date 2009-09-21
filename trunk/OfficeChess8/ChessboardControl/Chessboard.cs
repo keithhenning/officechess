@@ -68,9 +68,9 @@ namespace ChessboardControl
 		#endregion
 
 		//////////////////////////////////////////////////////////////////////////
-		// Initalization
+		// Initialization
 		//////////////////////////////////////////////////////////////////////////
-		#region Initalization
+		#region Initialization
 
 		public Chessboard()
 		{
@@ -379,8 +379,8 @@ namespace ChessboardControl
 							e.Graphics.FillRectangle(Brushes.IndianRed, rect);
 						}
 					}
-					
-					// now add some indicators
+
+					// show valid moves for current piece
 					if (m_bShownValidMoves && m_bMouseDown &&
 						GameData.g_CurrentGameState[m_SelectedSquare] != null &&
 						GameData.g_CurrentGameState[m_SelectedSquare].GetValidMoves().Contains(square))

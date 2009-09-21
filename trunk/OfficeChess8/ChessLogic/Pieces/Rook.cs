@@ -5,6 +5,7 @@ using Globals;
 
 namespace ChessLogic.Pieces
 {
+	[Serializable]
     class Rook : Piece
     {
         //////////////////////////////////////////////////////////////////////////

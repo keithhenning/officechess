@@ -91,9 +91,9 @@ namespace ChessLogic
 
 					// store current color that should be playing
 					if (m_nNumMoves % 2 == 0)
-						GameData.ColorMoving = PColor.White;
+						GameData.g_ColorMoving = PColor.White;
 					else
-						GameData.ColorMoving = PColor.Black;
+						GameData.g_ColorMoving = PColor.Black;
                 }
                 else
                 {
