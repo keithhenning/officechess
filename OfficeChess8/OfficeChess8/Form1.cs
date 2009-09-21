@@ -42,12 +42,12 @@ namespace OfficeChess8
 
 		private void button1_Click(object sender, EventArgs e)
 		{
-			GameData.SaveToFile("blah.dat");
+			GameData.SaveToFile("savegame.ocs");
 		}
 
 		private void button2_Click(object sender, EventArgs e)
 		{
-			GameData.LoadFromFile("blah.dat");
+			GameData.LoadFromFile("savegame.ocs");
 		}
 	}
 }
