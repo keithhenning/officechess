@@ -63,7 +63,7 @@ namespace ChessboardControl
 		private bool m_bImageFilesLoaded = false;
 		private List<int> m_SupportedSquareSizes = new List<int>();
 		private bool m_bShownValidMoves = true;
-		private bool m_bShownAttackedSquares = true;
+		private bool m_bShownAttackedPieces = true;
 
 		#endregion
 
@@ -360,15 +360,20 @@ namespace ChessboardControl
 						e.Graphics.FillRectangle(Brushes.MediumSeaGreen, rect);
 					}
 
-					// now add some indicators
-					if (m_bShownAttackedSquares)
+					// show attacked pieces
+					if (m_bShownAttackedPieces)
 					{
-						if (GameData.ColorMoving == PColor.White && GameData.g_SquaresAttackedByBlack.Contains(square))
+						if (GameData.g_SquaresAttackedByBlack.Contains(square) && 
+							GameData.g_CurrentGameState[square] != null && 
+							GameData.g_CurrentGameState[square].GetColor() == PColor.White)
 						{
 							rect = new RectangleF(c * m_SquareSize + 6, (7 - r) * m_SquareSize + 6, 6, 6);
 							e.Graphics.FillRectangle(Brushes.IndianRed, rect);
 						}
-						else if (GameData.ColorMoving == PColor.Black && GameData.g_SquaresAttackedByWhite.Contains(square))
+						else 
+						if (GameData.g_SquaresAttackedByWhite.Contains(square) &&
+							GameData.g_CurrentGameState[square] != null && 
+							GameData.g_CurrentGameState[square].GetColor() == PColor.Black)
 						{
 							rect = new RectangleF(c * m_SquareSize + 6, (7 - r) * m_SquareSize + 6, 6, 6);
 							e.Graphics.FillRectangle(Brushes.IndianRed, rect);
