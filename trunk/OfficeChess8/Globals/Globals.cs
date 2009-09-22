@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.IO.Compression;
 
 namespace Globals
 {
@@ -177,7 +178,9 @@ namespace Globals
 				// save to file
 				BinaryFormatter bf = new BinaryFormatter();
 				FileStream fs = new FileStream(FileName, FileMode.Create);
-				bf.Serialize(fs, sd);
+                GZipStream gzs = new GZipStream(fs, CompressionMode.Compress);
+                bf.Serialize(gzs, sd);
+                gzs.Close();
 				fs.Close();
 				Console.WriteLine("Successfully saved game to: " + FileName);
 			}
@@ -200,7 +203,9 @@ namespace Globals
 				// load file
 				BinaryFormatter bf = new BinaryFormatter();
 				FileStream fs = new FileStream(FileName, FileMode.Open);
-				sd = (SaveData)bf.Deserialize(fs);
+                GZipStream gzs = new GZipStream(fs, CompressionMode.Decompress);
+				sd = (SaveData)bf.Deserialize(gzs);
+                gzs.Close();
 				fs.Close();
 
 				// check version number
