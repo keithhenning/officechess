@@ -55,7 +55,10 @@ namespace ChessLogic.Pieces
 		public override void SetPosition(int NewPosition)
         {
             // store previous position
-            m_nPrevPosition = m_nPosition;
+            if (m_nPosition == -1 && m_nPrevPosition == -1)
+                m_nPrevPosition = NewPosition;
+            else
+                m_nPrevPosition = m_nPosition;
 
             // set new position
             m_nPosition = NewPosition;
@@ -93,6 +96,25 @@ namespace ChessLogic.Pieces
 		public override bool CanMoveTo(int Destination)
         {
             return m_lValidMoves.Contains(Destination);
+        }
+
+        // returns whether or not this piece is still in it's initial position
+        public override bool HasMoved()
+        {
+            return (m_nPrevPosition != m_nPosition);
+        }
+
+        // adds a valid move to the valid moves list
+        public override void AddValidMove(int Square)
+        {
+            if (Square >= 0 && Square <= 63)
+                m_lValidMoves.Add(Square);
+        }
+
+        // returns if this pawn is enpassant candidate
+        public override bool GetEnPassantStatus()
+        {
+            return bIsEnPassantCandidate;
         }
 
         #endregion

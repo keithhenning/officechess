@@ -81,6 +81,37 @@ namespace ChessLogic.Pieces
             m_lValidMoves.AddRange(ValidMoves);
         }
 
+        // calculates all valid moves
+        protected override List<int> ValidateMoves(List<int> PreValidatedMoves)
+        {
+            // locals
+            List<int> ValidMoves = new List<int>();
+            int CurrentSquare = -1;
+
+            // first get the regular allowed moves
+            ValidMoves = base.ValidateMoves(PreValidatedMoves);
+
+            // see if any of the valid squares are attacked
+            for (int i = 0; i < ValidMoves.Count; i++)
+            {
+                CurrentSquare = ValidMoves[i];
+                if (m_Color == PColor.White && GameData.g_SquaresAttackedByBlack.Contains(CurrentSquare))
+                {
+                    ValidMoves.Remove(CurrentSquare);
+                    i--;
+                }
+
+                if (m_Color == PColor.Black && GameData.g_SquaresAttackedByWhite.Contains(CurrentSquare))
+                {
+                    ValidMoves.Remove(CurrentSquare);
+                    i--;
+                }
+            }
+
+            return ValidMoves;
+        }
+
+
         #endregion
     }
 }

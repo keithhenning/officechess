@@ -100,6 +100,15 @@ namespace Globals
 
 		// returns true if this piece can move to the destination square
 		abstract public bool CanMoveTo(int Destination);
+        
+        // returns whether or not this piece is still in it's initial position
+        abstract public bool HasMoved();
+
+        // adds a valid move to the valid moves list
+        abstract public void AddValidMove(int Square);
+
+        // returns if this pawn is enpassant candidate
+        abstract public bool GetEnPassantStatus();
 
 		#endregion
 
@@ -187,6 +196,7 @@ namespace Globals
 			catch
 			{
 				Console.WriteLine("ERROR: unable to save file..." + FileName);
+                return false;
 			}
 
 			return true;
@@ -219,11 +229,13 @@ namespace Globals
 				else
 				{
 					Console.WriteLine("ERROR: unable to open file: " + FileName + ", incorrect save game file version...");
+                    return false;
 				}
 			}
 			catch
 			{
 				Console.WriteLine("ERROR: unable to open file: " + FileName);
+                return false;
 			}
 
 			return true;
