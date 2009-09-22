@@ -53,7 +53,7 @@ namespace ChessLogic
         }
 
         // evaluates the move
-        private bool IsRegularMoveAllowed(int CurrentSquare, int TargetSquare)
+        private bool IsMoveAllowed(int CurrentSquare, int TargetSquare)
         {
             bool bCanMove = false;
 
@@ -70,18 +70,23 @@ namespace ChessLogic
             bool bMoveAllowed = false;
 
             // checks to see if the piece on the current square can move to the destination square
-            bMoveAllowed = IsRegularMoveAllowed(CurrentSquare, TargetSquare);
+            bMoveAllowed = IsMoveAllowed(CurrentSquare, TargetSquare);
 
             // do the actual move
             if (bMoveAllowed)
             {
-				// set internal board
+				// update game state
                 if (GameData.g_CurrentGameState[CurrentSquare] != null)
                 {
-                    // update the game state
-                    GameData.g_CurrentGameState[CurrentSquare].SetPosition(TargetSquare);
-                    GameData.g_CurrentGameState[TargetSquare] = GameData.g_CurrentGameState[CurrentSquare];
-                    GameData.g_CurrentGameState[CurrentSquare] = null;
+                    // first see if we are castling or doing enpassant
+                    if (!TryCastling(CurrentSquare, TargetSquare) && !TryEnPassant(CurrentSquare, TargetSquare))
+                    {
+                        // if not, do normal move
+                        GameData.g_CurrentGameState[CurrentSquare].SetPosition(TargetSquare);
+                        GameData.g_CurrentGameState[TargetSquare] = GameData.g_CurrentGameState[CurrentSquare];
+                        GameData.g_CurrentGameState[CurrentSquare] = null;
+                    }
+
 
                     // update the pieces
                     Update();
@@ -104,30 +109,10 @@ namespace ChessLogic
 			return bMoveAllowed;
         }
 
-        // gets all squares that a piece from <PieceColor> can move to
-        public List<int> GetValidMovesFor(PColor PieceColor)
-        {
-            List<int> ValidMoves = new List<int>();
-
-            // iterate through all pieces of the right color
-            for (int idx = 0; idx < GameData.g_CurrentGameState.Length; idx++)
-            {
-                if (GameData.g_CurrentGameState[idx] != null && GameData.g_CurrentGameState[idx].GetColor() == PieceColor)
-                {
-                    // if it's the right color add it's valid moves to the list
-                    ValidMoves.AddRange(GameData.g_CurrentGameState[idx].GetValidMoves());
-                }
-            }
-
-            // remove duplicates from the list
-            ValidMoves = Etc.RemoveDuplicatesFromList(ValidMoves);
-
-            return ValidMoves;
-		}
 		#endregion
 
 		//////////////////////////////////////////////////////////////////////////
-		// Public/protected methods
+		// Private / protected methods
 		//////////////////////////////////////////////////////////////////////////
 		#region Private / protected methods
 
@@ -137,11 +122,13 @@ namespace ChessLogic
 			UpdatePieces();
 			UpdateAttackedSquares();
 			UpdateValidMoves();
+            UpdateCastling();
         }
 
 		// update all moves and attacked squares for all pieces
 		protected void UpdatePieces()
 		{
+            // let all pieces update their valid moves and their attacked squares
 			for (int idx = 0; idx < GameData.g_CurrentGameState.Length; idx++)
 			{
 				if (GameData.g_CurrentGameState[idx] != null)
@@ -149,7 +136,7 @@ namespace ChessLogic
 			}
 		}
 
-		// upates global list of attacked squares
+		// updates global list of attacked squares
 		protected void UpdateAttackedSquares()
 		{
 			// update all attacked squares
@@ -184,6 +171,7 @@ namespace ChessLogic
 			GameData.g_SquaresAttackedByBlack.AddRange(AttackedSquaresBlack);
 		}
 
+        // updates the global valid move list
 		protected void UpdateValidMoves()
 		{
 			// update all valid moves
@@ -217,6 +205,270 @@ namespace ChessLogic
 			GameData.g_ValidMovesBlack.Clear();
 			GameData.g_ValidMovesBlack.AddRange(ValidMovesBlack);
 		}
+
+        // updates castling opportunities
+        protected void UpdateCastling()
+        {
+            // update the kings again because pieces might have been updated in the wrong order
+            for (int idx = 0; idx < GameData.g_CurrentGameState.Length; idx++)
+            {
+                if (GameData.g_CurrentGameState[idx] != null && (GameData.g_CurrentGameState[idx].GetPieceType() == PType.WhiteKing || GameData.g_CurrentGameState[idx].GetPieceType() == PType.BlackKing))
+                    GameData.g_CurrentGameState[idx].Update();
+            }
+
+            // first the white king, long castle
+            if (GameData.g_CurrentGameState[4] != null &&
+                GameData.g_CurrentGameState[0] != null &&
+
+                GameData.g_CurrentGameState[4].GetPieceType() == PType.WhiteKing &&
+                GameData.g_CurrentGameState[0].GetPieceType() == PType.WhiteRook &&
+                
+                !GameData.g_CurrentGameState[4].HasMoved() &&
+                !GameData.g_CurrentGameState[0].HasMoved())
+            {
+                if (GameData.g_CurrentGameState[3] == null &&
+                    !GameData.g_SquaresAttackedByBlack.Contains(3) &&
+
+                    GameData.g_CurrentGameState[2] == null &&
+                    !GameData.g_SquaresAttackedByBlack.Contains(2) &&
+
+                    !GameData.g_SquaresAttackedByBlack.Contains(4) &&
+                    !GameData.g_SquaresAttackedByBlack.Contains(0)
+                    )
+                {
+                    GameData.g_CurrentGameState[4].AddValidMove(2);
+                }
+            }
+
+            // now check the white king, short castle
+            if (GameData.g_CurrentGameState[4] != null &&
+                GameData.g_CurrentGameState[7] != null &&
+
+                GameData.g_CurrentGameState[4].GetPieceType() == PType.WhiteKing &&
+                GameData.g_CurrentGameState[7].GetPieceType() == PType.WhiteRook &&
+
+                !GameData.g_CurrentGameState[4].HasMoved() &&
+                !GameData.g_CurrentGameState[7].HasMoved())
+            {
+                if (GameData.g_CurrentGameState[5] == null &&
+                    !GameData.g_SquaresAttackedByBlack.Contains(5) &&
+
+                    GameData.g_CurrentGameState[6] == null &&
+                    !GameData.g_SquaresAttackedByBlack.Contains(6) &&
+
+                    !GameData.g_SquaresAttackedByBlack.Contains(4) &&
+                    !GameData.g_SquaresAttackedByBlack.Contains(7)
+                    )
+                {
+                    GameData.g_CurrentGameState[4].AddValidMove(6);
+                }
+            }
+
+            // now the black king, long castle
+            if (GameData.g_CurrentGameState[60] != null &&
+                GameData.g_CurrentGameState[56] != null &&
+
+                GameData.g_CurrentGameState[60].GetPieceType() == PType.BlackKing &&
+                GameData.g_CurrentGameState[56].GetPieceType() == PType.BlackRook &&
+
+                !GameData.g_CurrentGameState[60].HasMoved() &&
+                !GameData.g_CurrentGameState[56].HasMoved())
+            {
+                if (GameData.g_CurrentGameState[59] == null &&
+                    !GameData.g_SquaresAttackedByWhite.Contains(59) &&
+
+                    GameData.g_CurrentGameState[58] == null &&
+                    !GameData.g_SquaresAttackedByWhite.Contains(58) &&
+
+
+                    !GameData.g_SquaresAttackedByWhite.Contains(60) &&
+                    !GameData.g_SquaresAttackedByWhite.Contains(56)
+                    )
+                {
+                    GameData.g_CurrentGameState[60].AddValidMove(58);
+                }
+            }
+
+            // now check the black king, short castle
+            if (GameData.g_CurrentGameState[60] != null &&
+                GameData.g_CurrentGameState[63] != null &&
+
+                GameData.g_CurrentGameState[60].GetPieceType() == PType.BlackKing &&
+                GameData.g_CurrentGameState[63].GetPieceType() == PType.BlackRook &&
+
+                !GameData.g_CurrentGameState[60].HasMoved() &&
+                !GameData.g_CurrentGameState[63].HasMoved())
+            {
+                if (GameData.g_CurrentGameState[61] == null &&
+                    !GameData.g_SquaresAttackedByWhite.Contains(61) &&
+
+                    GameData.g_CurrentGameState[62] == null &&
+                    !GameData.g_SquaresAttackedByWhite.Contains(62) &&
+
+                    !GameData.g_SquaresAttackedByWhite.Contains(60) &&
+                    !GameData.g_SquaresAttackedByWhite.Contains(63)
+                    )
+                {
+                    GameData.g_CurrentGameState[60].AddValidMove(62);
+                }
+            }
+        }
+
+        // sees if we need to castle
+        protected bool TryCastling(int CurrentSquare, int TargetSquare)
+        {
+            Pieces.Piece CurrentPiece = (Pieces.Piece)GameData.g_CurrentGameState[CurrentSquare];
+
+            if (CurrentPiece != null)
+            {
+                int SquareDifference = TargetSquare - CurrentSquare;
+                if (CurrentPiece.GetPieceType() == PType.WhiteKing)
+                {
+                    // white, long castle
+                    if (SquareDifference == -2 && CurrentPiece.CanMoveTo(TargetSquare))
+                    {
+                        // do move
+                        GameData.g_CurrentGameState[3] = GameData.g_CurrentGameState[0];
+                        GameData.g_CurrentGameState[3].SetPosition(3);
+                        GameData.g_CurrentGameState[0] = null;
+
+                        GameData.g_CurrentGameState[2] = GameData.g_CurrentGameState[4];
+                        GameData.g_CurrentGameState[4].SetPosition(4);
+                        GameData.g_CurrentGameState[4] = null;
+                        return true;
+                    }
+                    // white, short castle
+                    else if (SquareDifference == 2 && CurrentPiece.CanMoveTo(TargetSquare))
+                    {
+                        // do move
+                        GameData.g_CurrentGameState[6] = GameData.g_CurrentGameState[4];
+                        GameData.g_CurrentGameState[4].SetPosition(4);
+                        GameData.g_CurrentGameState[4] = null;
+
+                        GameData.g_CurrentGameState[5] = GameData.g_CurrentGameState[7];
+                        GameData.g_CurrentGameState[5].SetPosition(5);
+                        GameData.g_CurrentGameState[7] = null;
+                        return true;
+                    }
+                }
+                else if (CurrentPiece.GetPieceType() == PType.BlackKing)
+                {
+                    // black, short castle 
+                    if (SquareDifference == 2 && CurrentPiece.CanMoveTo(TargetSquare))
+                    {
+                        // do move
+                        GameData.g_CurrentGameState[61] = GameData.g_CurrentGameState[63];
+                        GameData.g_CurrentGameState[61].SetPosition(61);
+                        GameData.g_CurrentGameState[63] = null;
+
+                        GameData.g_CurrentGameState[62] = GameData.g_CurrentGameState[60];
+                        GameData.g_CurrentGameState[62].SetPosition(62);
+                        GameData.g_CurrentGameState[60] = null;
+                        return true;
+                    }
+                    // black long castle
+                    else if (SquareDifference == -2 && CurrentPiece.CanMoveTo(TargetSquare))
+                    {
+                        // do move
+                        GameData.g_CurrentGameState[58] = GameData.g_CurrentGameState[60];
+                        GameData.g_CurrentGameState[58].SetPosition(58);
+                        GameData.g_CurrentGameState[60] = null;
+
+                        GameData.g_CurrentGameState[59] = GameData.g_CurrentGameState[56];
+                        GameData.g_CurrentGameState[59].SetPosition(59);
+                        GameData.g_CurrentGameState[56] = null;
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        // sees if we need to do enpassant
+        protected bool TryEnPassant(int CurrentSquare, int TargetSquare)
+        {
+            Pieces.Piece CurrentPiece = (Pieces.Piece)GameData.g_CurrentGameState[CurrentSquare];
+
+            if (CurrentPiece != null)
+            {
+                int SquareDifference = TargetSquare - CurrentSquare;
+                int Row = -1;
+                int Col = -1;
+
+                Etc.GetRowColFromSquare(CurrentSquare, out Row, out Col);
+                
+                // white, moving NW
+                if (SquareDifference == 7)
+                {
+                    Col--;
+                    int OpponentSquare = -1;
+                    Etc.GetSquareFromRowCol(Row, Col, out OpponentSquare);
+                    if (GameData.g_CurrentGameState[OpponentSquare] != null && GameData.g_CurrentGameState[OpponentSquare].GetEnPassantStatus() == true)
+                    {
+                        // do move
+                        GameData.g_CurrentGameState[OpponentSquare] = null;
+                        GameData.g_CurrentGameState[CurrentSquare] = null;
+                        CurrentPiece.SetPosition(TargetSquare);
+                        GameData.g_CurrentGameState[TargetSquare] = CurrentPiece;
+                        return true;
+                    }
+                }
+
+                // white, moving NE
+                if (SquareDifference == 9)
+                {
+                    Col++;
+                    int OpponentSquare = -1;
+                    Etc.GetSquareFromRowCol(Row, Col, out OpponentSquare);
+                    if (GameData.g_CurrentGameState[OpponentSquare] != null && GameData.g_CurrentGameState[OpponentSquare].GetEnPassantStatus() == true)
+                    {
+                        // do move
+                        GameData.g_CurrentGameState[OpponentSquare] = null;
+                        GameData.g_CurrentGameState[CurrentSquare] = null;
+                        CurrentPiece.SetPosition(TargetSquare);
+                        GameData.g_CurrentGameState[TargetSquare] = CurrentPiece;
+                        return true;
+                    }
+                }
+
+                // black, moving SE
+                if (SquareDifference == -7)
+                {
+                    Col++;
+                    int OpponentSquare = -1;
+                    Etc.GetSquareFromRowCol(Row, Col, out OpponentSquare);
+                    if (GameData.g_CurrentGameState[OpponentSquare] != null && GameData.g_CurrentGameState[OpponentSquare].GetEnPassantStatus() == true)
+                    {
+                        // do move
+                        GameData.g_CurrentGameState[OpponentSquare] = null;
+                        GameData.g_CurrentGameState[CurrentSquare] = null;
+                        CurrentPiece.SetPosition(TargetSquare);
+                        GameData.g_CurrentGameState[TargetSquare] = CurrentPiece;
+                        return true;
+                    }
+                }
+
+                // black, moving SW
+                if (SquareDifference == -9)
+                {
+                    Col--;
+                    int OpponentSquare = -1;
+                    Etc.GetSquareFromRowCol(Row, Col, out OpponentSquare);
+                    if (GameData.g_CurrentGameState[OpponentSquare] != null && GameData.g_CurrentGameState[OpponentSquare].GetEnPassantStatus() == true)
+                    {
+                        // do move
+                        GameData.g_CurrentGameState[OpponentSquare] = null;
+                        GameData.g_CurrentGameState[CurrentSquare] = null;
+                        CurrentPiece.SetPosition(TargetSquare);
+                        GameData.g_CurrentGameState[TargetSquare] = CurrentPiece;
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
 
 		// reset internal board to the current game state
 		protected void ResetBoard()

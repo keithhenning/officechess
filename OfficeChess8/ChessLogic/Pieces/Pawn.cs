@@ -62,7 +62,8 @@ namespace ChessLogic.Pieces
             // update when white
             if (m_Color == PColor.White)
             {
-				// gets row and column number from current square
+                #region NORMAL_TAKE
+                // gets row and column number from current square
 				Etc.GetRowColFromSquare(m_nPosition, out Row, out Col);
 
 				// look to the NW to see if we can capture any pieces
@@ -88,16 +89,46 @@ namespace ChessLogic.Pieces
 				if (CurrentSquare >= 0)
 				{
 					AttackedSquares.Add(CurrentSquare);
-				}
+                }
+                #endregion
+
+                #region ENPASSANT
+                // gets row and column number from current square
+                Etc.GetRowColFromSquare(m_nPosition, out Row, out Col);
+
+                // look to the NW to see if enpassant any pieces
+                Col++;
+
+                Etc.GetSquareFromRowCol(Row, Col, out CurrentSquare);
+
+                if (CurrentSquare >= 0 && GameData.g_CurrentGameState[CurrentSquare] != null && GameData.g_CurrentGameState[CurrentSquare].GetPieceType() == PType.BlackPawn && GameData.g_CurrentGameState[CurrentSquare].GetEnPassantStatus() ==  true)
+                {
+                    AttackedSquares.Add(CurrentSquare);
+                }
+
+                // gets row and column number from current square
+                Etc.GetRowColFromSquare(m_nPosition, out Row, out Col);
+
+                // look to the NE to see if enpassant any pieces
+                Col--;
+
+                Etc.GetSquareFromRowCol(Row, Col, out CurrentSquare);
+
+                if (CurrentSquare >= 0 && GameData.g_CurrentGameState[CurrentSquare] != null && GameData.g_CurrentGameState[CurrentSquare].GetPieceType() == PType.BlackPawn && GameData.g_CurrentGameState[CurrentSquare].GetEnPassantStatus() == true)
+                {
+                    AttackedSquares.Add(CurrentSquare);
+                }
+                #endregion
             }
 
             // update when black
             if (m_Color == PColor.Black)
             {
-				// gets row and column number from current square
+                #region NORMAL_TAKE
+                // gets row and column number from current square
 				Etc.GetRowColFromSquare(m_nPosition, out Row, out Col);
 
-				// look to the NW to see if we can capture any pieces
+				// look to the SW to see if we can capture any pieces
 				Row--;
 				Col--;
 
@@ -111,7 +142,7 @@ namespace ChessLogic.Pieces
 				// gets row and column number from current square
 				Etc.GetRowColFromSquare(m_nPosition, out Row, out Col);
 
-				// look to the NW to see if we can capture any pieces
+				// look to the SE to see if we can capture any pieces
 				Row--;
 				Col++;
 
@@ -120,7 +151,36 @@ namespace ChessLogic.Pieces
 				if (CurrentSquare >= 0)
 				{
 					AttackedSquares.Add(CurrentSquare);
-				}
+                }
+                #endregion
+
+                #region ENPASSANT
+                // gets row and column number from current square
+                Etc.GetRowColFromSquare(m_nPosition, out Row, out Col);
+
+                // look to the SW to see if enpassant any pieces
+                Col++;
+
+                Etc.GetSquareFromRowCol(Row, Col, out CurrentSquare);
+
+                if (CurrentSquare >= 0 && GameData.g_CurrentGameState[CurrentSquare] != null && GameData.g_CurrentGameState[CurrentSquare].GetPieceType() == PType.WhitePawn && GameData.g_CurrentGameState[CurrentSquare].GetEnPassantStatus() == true)
+                {
+                    AttackedSquares.Add(CurrentSquare);
+                }
+
+                // gets row and column number from current square
+                Etc.GetRowColFromSquare(m_nPosition, out Row, out Col);
+
+                // look to the SE to see if enpassant any pieces
+                Col--;
+
+                Etc.GetSquareFromRowCol(Row, Col, out CurrentSquare);
+
+                if (CurrentSquare >= 0 && GameData.g_CurrentGameState[CurrentSquare] != null && GameData.g_CurrentGameState[CurrentSquare].GetPieceType() == PType.WhitePawn && GameData.g_CurrentGameState[CurrentSquare].GetEnPassantStatus() == true)
+                {
+                    AttackedSquares.Add(CurrentSquare);
+                }
+                #endregion
             }
 
             // add these square to the list
@@ -147,8 +207,9 @@ namespace ChessLogic.Pieces
 
 			// check for white
             if (m_Color == PColor.White)
-			{
-				// move one square ahead
+            {
+                #region STRAIGHT_AHEAD
+                // move one square ahead
 				Row++;
 				Etc.GetSquareFromRowCol(Row, Col, out CurrentSquare);
 
@@ -169,9 +230,11 @@ namespace ChessLogic.Pieces
 					{
 						m_lValidMoves.Add(CurrentSquare);
 					}
-				}
+                }
+                #endregion
 
-				// gets row and column number from current square
+                #region NORMAL_TAKE
+                // gets row and column number from current square
 				Etc.GetRowColFromSquare(m_nPosition, out Row, out Col);
 
 				// look to the NW to see if we can capture any pieces
@@ -201,13 +264,53 @@ namespace ChessLogic.Pieces
 					GameData.g_CurrentGameState[CurrentSquare].GetColor() == PColor.Black)
 				{
 					m_lValidMoves.Add(CurrentSquare);
-				}
-			}
+                }
+                #endregion
+
+                #region ENPASSANT
+                // gets row and column number from current square
+                Etc.GetRowColFromSquare(m_nPosition, out Row, out Col);
+
+                // look to the NW to see if we EnPassant any pieces
+                Col--;
+
+                Etc.GetSquareFromRowCol(Row, Col, out CurrentSquare);
+
+                if (CurrentSquare >= 0 &&
+                    GameData.g_CurrentGameState[CurrentSquare] != null &&
+                    GameData.g_CurrentGameState[CurrentSquare].GetColor() == PColor.Black && 
+                    GameData.g_CurrentGameState[CurrentSquare].GetEnPassantStatus() == true)
+                {
+                    Row++;
+                    Etc.GetSquareFromRowCol(Row, Col, out CurrentSquare);
+                    m_lValidMoves.Add(CurrentSquare);
+                }
+
+                // gets row and column number from current square
+                Etc.GetRowColFromSquare(m_nPosition, out Row, out Col);
+
+                // look to the NE to see if we EnPassant any pieces
+                Col++;
+
+                Etc.GetSquareFromRowCol(Row, Col, out CurrentSquare);
+
+                if (CurrentSquare >= 0 &&
+                    GameData.g_CurrentGameState[CurrentSquare] != null &&
+                    GameData.g_CurrentGameState[CurrentSquare].GetColor() == PColor.Black && 
+                    GameData.g_CurrentGameState[CurrentSquare].GetEnPassantStatus() == true)
+                {
+                    Row++;
+                    Etc.GetSquareFromRowCol(Row, Col, out CurrentSquare);
+                    m_lValidMoves.Add(CurrentSquare);
+                }
+                #endregion
+            }
 
 			// check for black
 			if (m_Color == PColor.Black)
-			{
-				// move one square ahead
+            {
+                #region STRAIGHT_AHEAD
+                // move one square ahead
 				Row--;
 				Etc.GetSquareFromRowCol(Row, Col, out CurrentSquare);
 
@@ -228,9 +331,11 @@ namespace ChessLogic.Pieces
 					{
 						m_lValidMoves.Add(CurrentSquare);
 					}
-				}
+                }
+                #endregion
 
-				// gets row and column number from current square
+                #region NORMAL_TAKE
+                // gets row and column number from current square
 				Etc.GetRowColFromSquare(m_nPosition, out Row, out Col);
 
 				// look to the NW to see if we can capture any pieces
@@ -260,8 +365,47 @@ namespace ChessLogic.Pieces
 					GameData.g_CurrentGameState[CurrentSquare].GetColor() == PColor.White)
 				{
 					m_lValidMoves.Add(CurrentSquare);
-				}
-			}
+                }
+                #endregion
+
+                #region ENPASSANT
+                // gets row and column number from current square
+                Etc.GetRowColFromSquare(m_nPosition, out Row, out Col);
+
+                // look to the SW to see if we EnPassant any pieces
+                Col--;
+
+                Etc.GetSquareFromRowCol(Row, Col, out CurrentSquare);
+
+                if (CurrentSquare >= 0 &&
+                    GameData.g_CurrentGameState[CurrentSquare] != null &&
+                    GameData.g_CurrentGameState[CurrentSquare].GetColor() == PColor.White && 
+                    GameData.g_CurrentGameState[CurrentSquare].GetEnPassantStatus() == true)
+                {
+                    Row--;
+                    Etc.GetSquareFromRowCol(Row, Col, out CurrentSquare);
+                    m_lValidMoves.Add(CurrentSquare);
+                }
+
+                // gets row and column number from current square
+                Etc.GetRowColFromSquare(m_nPosition, out Row, out Col);
+
+                // look to the SE to see if we EnPassant any pieces
+                Col++;
+
+                Etc.GetSquareFromRowCol(Row, Col, out CurrentSquare);
+
+                if (CurrentSquare >= 0 &&
+                    GameData.g_CurrentGameState[CurrentSquare] != null &&
+                    GameData.g_CurrentGameState[CurrentSquare].GetColor() == PColor.White && 
+                    GameData.g_CurrentGameState[CurrentSquare].GetEnPassantStatus() == true)
+                {
+                    Row--;
+                    Etc.GetSquareFromRowCol(Row, Col, out CurrentSquare);
+                    m_lValidMoves.Add(CurrentSquare);
+                }
+                #endregion
+            }
 
             // if there are moves, add them
             m_lValidMoves.AddRange(ValidMoves);
