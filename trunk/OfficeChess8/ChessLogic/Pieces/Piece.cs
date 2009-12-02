@@ -30,7 +30,7 @@ namespace ChessLogic.Pieces
             m_nPrevPosition = -1;
             m_lAttackingSquares = new List<int>();
             m_lValidMoves = new List<int>();
-            bIsEnPassantCandidate = false;
+            m_lEnPassantMoves = new List<int>();
         }
 
         // gets the piece type
@@ -111,10 +111,15 @@ namespace ChessLogic.Pieces
                 m_lValidMoves.Add(Square);
         }
 
-        // returns if this pawn is enpassant candidate
-        public override bool GetEnPassantStatus()
+        // adds enpassant move to list
+        public override void AddEnPassantMove(int Square)
         {
-            return bIsEnPassantCandidate;
+        }
+
+        // adds enpassant move to list
+        public override List<int> GetEnPassantMoves()
+        {
+            return m_lEnPassantMoves;
         }
 
         #endregion
