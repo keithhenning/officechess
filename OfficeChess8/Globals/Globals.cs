@@ -68,7 +68,9 @@ namespace Globals
 		protected int m_nPrevPosition;
 		protected List<int> m_lAttackingSquares;
 		protected List<int> m_lValidMoves;
-		protected bool bIsEnPassantCandidate;
+        public List<int> m_lEnPassantMoves;
+        protected bool m_bCanEnPassant;
+        protected int m_ID;
 
 		#endregion
 
@@ -107,8 +109,11 @@ namespace Globals
         // adds a valid move to the valid moves list
         abstract public void AddValidMove(int Square);
 
-        // returns if this pawn is enpassant candidate
-        abstract public bool GetEnPassantStatus();
+        // adds enpassant move
+        abstract public void AddEnPassantMove(int Square);
+
+        // adds enpassant move
+        abstract public List<int> GetEnPassantMoves();
 
 		#endregion
 
@@ -147,6 +152,15 @@ namespace Globals
 		public PColor ColorMoving = PColor.White;
 	}
 
+    // last move data
+    public class AMove
+    {
+        public PColor ColorMoved;
+        public int FromSquare;
+        public int ToSquare;
+    }
+
+    // current game state data
 	static public class GameData
 	{
 		// current gamestate
@@ -160,6 +174,8 @@ namespace Globals
 		static public List<int> g_ValidMovesBlack = new List<int>();
 
 		static public PColor g_ColorMoving = PColor.White;
+
+        static public AMove g_LastMove = new AMove();
 
 		// classic starting positions 
 		static public sbyte[] g_StartingPositions = 

@@ -21,6 +21,7 @@ namespace ChessLogic
         private int m_nNumMoves = 0;
         private int m_nNumMovesSinceLastCapture = 0;
         private int m_nNumCaptured = 0;
+        //private PColor m_LastColorMoved = PColor.Black;
 
 		#endregion
 
@@ -87,6 +88,10 @@ namespace ChessLogic
                         GameData.g_CurrentGameState[CurrentSquare] = null;
                     }
 
+                    // store last move
+                    GameData.g_LastMove.ColorMoved = GameData.g_CurrentGameState[TargetSquare].GetColor();
+                    GameData.g_LastMove.FromSquare = CurrentSquare;
+                    GameData.g_LastMove.ToSquare = TargetSquare;
 
                     // update the pieces
                     Update();
@@ -314,7 +319,7 @@ namespace ChessLogic
             }
         }
 
-        // sees if we need to castle
+        // sees if we can castle
         protected bool TryCastling(int CurrentSquare, int TargetSquare)
         {
             Pieces.Piece CurrentPiece = (Pieces.Piece)GameData.g_CurrentGameState[CurrentSquare];
@@ -392,73 +397,21 @@ namespace ChessLogic
 
             if (CurrentPiece != null)
             {
-                int SquareDifference = TargetSquare - CurrentSquare;
-                int Row = -1;
-                int Col = -1;
-
-                Etc.GetRowColFromSquare(CurrentSquare, out Row, out Col);
-                
-                // white, moving NW
-                if (SquareDifference == 7)
+                if (CurrentPiece.GetEnPassantMoves().Contains(TargetSquare))
                 {
-                    Col--;
-                    int OpponentSquare = -1;
-                    Etc.GetSquareFromRowCol(Row, Col, out OpponentSquare);
-                    if (GameData.g_CurrentGameState[OpponentSquare] != null && GameData.g_CurrentGameState[OpponentSquare].GetEnPassantStatus() == true)
+                    // do move
+                    if (CurrentPiece.GetColor() == PColor.White)
                     {
-                        // do move
-                        GameData.g_CurrentGameState[OpponentSquare] = null;
+                        GameData.g_CurrentGameState[TargetSquare-8] = null;
                         GameData.g_CurrentGameState[CurrentSquare] = null;
                         CurrentPiece.SetPosition(TargetSquare);
                         GameData.g_CurrentGameState[TargetSquare] = CurrentPiece;
                         return true;
                     }
-                }
-
-                // white, moving NE
-                if (SquareDifference == 9)
-                {
-                    Col++;
-                    int OpponentSquare = -1;
-                    Etc.GetSquareFromRowCol(Row, Col, out OpponentSquare);
-                    if (GameData.g_CurrentGameState[OpponentSquare] != null && GameData.g_CurrentGameState[OpponentSquare].GetEnPassantStatus() == true)
+                    // do move
+                    else if (CurrentPiece.GetColor() == PColor.Black)
                     {
-                        // do move
-                        GameData.g_CurrentGameState[OpponentSquare] = null;
-                        GameData.g_CurrentGameState[CurrentSquare] = null;
-                        CurrentPiece.SetPosition(TargetSquare);
-                        GameData.g_CurrentGameState[TargetSquare] = CurrentPiece;
-                        return true;
-                    }
-                }
-
-                // black, moving SE
-                if (SquareDifference == -7)
-                {
-                    Col++;
-                    int OpponentSquare = -1;
-                    Etc.GetSquareFromRowCol(Row, Col, out OpponentSquare);
-                    if (GameData.g_CurrentGameState[OpponentSquare] != null && GameData.g_CurrentGameState[OpponentSquare].GetEnPassantStatus() == true)
-                    {
-                        // do move
-                        GameData.g_CurrentGameState[OpponentSquare] = null;
-                        GameData.g_CurrentGameState[CurrentSquare] = null;
-                        CurrentPiece.SetPosition(TargetSquare);
-                        GameData.g_CurrentGameState[TargetSquare] = CurrentPiece;
-                        return true;
-                    }
-                }
-
-                // black, moving SW
-                if (SquareDifference == -9)
-                {
-                    Col--;
-                    int OpponentSquare = -1;
-                    Etc.GetSquareFromRowCol(Row, Col, out OpponentSquare);
-                    if (GameData.g_CurrentGameState[OpponentSquare] != null && GameData.g_CurrentGameState[OpponentSquare].GetEnPassantStatus() == true)
-                    {
-                        // do move
-                        GameData.g_CurrentGameState[OpponentSquare] = null;
+                        GameData.g_CurrentGameState[TargetSquare + 8] = null;
                         GameData.g_CurrentGameState[CurrentSquare] = null;
                         CurrentPiece.SetPosition(TargetSquare);
                         GameData.g_CurrentGameState[TargetSquare] = CurrentPiece;
