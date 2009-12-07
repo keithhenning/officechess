@@ -4,6 +4,7 @@ using System.Text;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO.Compression;
+using System.Runtime.InteropServices;
 
 namespace Globals
 {
@@ -308,6 +309,50 @@ namespace Globals
                 return false;
             }
 		}
+
+        // serialize object to byte array
+        static public byte[] ObjectToByteArray(object anything)
+        {
+            try
+            {
+                int structsize = Marshal.SizeOf(anything);
+                IntPtr buffer = Marshal.AllocHGlobal(structsize);
+                Marshal.StructureToPtr(anything, buffer, false);
+                byte[] streamdatas = new byte[structsize];
+                Marshal.Copy(buffer, streamdatas, 0, structsize);
+                Marshal.FreeHGlobal(buffer);
+                return streamdatas;
+            }
+            catch (ArgumentException e)
+            {
+                Console.WriteLine("ERROR: ObjectToByteArray() - " + e.Message.ToString());
+                return null;
+            }
+        }
+
+        // Deserialize byte array to object
+        static public object ByteArrayToObject(byte[] rawdata, Type anytype)
+        {
+            object retobj = null;
+            int rawsize = Marshal.SizeOf(anytype);
+
+            if (rawsize <= rawdata.Length)
+            {
+                try
+                {
+                    IntPtr buffer = Marshal.AllocHGlobal(rawsize);
+                    Marshal.Copy(rawdata, 0, buffer, rawsize);
+                    retobj = Marshal.PtrToStructure(buffer, anytype);
+                    Marshal.FreeHGlobal(buffer);
+                }
+                catch (ArgumentException e)
+                {
+                    Console.WriteLine("ERROR: ByteArrayToObject() - " + e.Message.ToString());
+                }
+            }
+
+            return retobj;
+        }
 	}
 
 }
