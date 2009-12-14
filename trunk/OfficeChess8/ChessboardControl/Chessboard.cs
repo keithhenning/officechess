@@ -62,8 +62,8 @@ namespace ChessboardControl
 		private float m_PieceOffsetY = 0.0f;
 		private bool m_bImageFilesLoaded = false;
 		private List<int> m_SupportedSquareSizes = new List<int>();
-		private bool m_bShownValidMoves = true;
-		private bool m_bShownAttackedPieces = true;
+		private bool m_bShowValidMoves = true;
+		private bool m_bShowAttackedPieces = true;
 
 		#endregion
 
@@ -115,6 +115,18 @@ namespace ChessboardControl
 		// Helpers
 		//////////////////////////////////////////////////////////////////////////
 		#region Helpers
+
+        // sets visibility option for attacked pieces
+        public void SetShowAttackedPieces(bool bEnabled)
+        {
+            m_bShowAttackedPieces = bEnabled;
+        }
+
+        // sets visibility option for valid moves
+        public void SetShowValidMoves(bool bEnabled)
+        {
+            m_bShowValidMoves = bEnabled;
+        }
 
 		// gets column the mouse is hovering over
 		public int GetMouseColPosition()
@@ -361,7 +373,7 @@ namespace ChessboardControl
 					}
 
 					// show attacked pieces
-					if (m_bShownAttackedPieces)
+					if (m_bShowAttackedPieces)
 					{
 						if (GameData.g_SquaresAttackedByBlack.Contains(square) && 
 							GameData.g_CurrentGameState[square] != null && 
@@ -381,7 +393,7 @@ namespace ChessboardControl
 					}
 
 					// show valid moves for current piece
-					if (m_bShownValidMoves && m_bMouseDown &&
+					if (m_bShowValidMoves && m_bMouseDown &&
 						GameData.g_CurrentGameState[m_SelectedSquare] != null &&
 						GameData.g_CurrentGameState[m_SelectedSquare].GetValidMoves().Contains(square))
 					{
