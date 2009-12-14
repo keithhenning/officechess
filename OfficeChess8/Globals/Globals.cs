@@ -144,18 +144,28 @@ namespace Globals
 		#endregion
 	}
 
-    public enum NetworkCommand
+    // possible network commands
+    public enum NetworkCommand : byte
     {
+        NEW_GAME,
+        LOAD_GAME,
         MAKE_MOVE,
         RESIGN,
-        OFFER_DRAW
+        OFFER_DRAW,
+        SYNC_BOARD,
+        INVALID_MOVE,
+        MOVE_ACCEPTED
     };
 
-    public struct NetworkPackage
+    // package used to send and receive data from clients
+    // make sure MAX_PACKET_SIZE for server can contain this data
+    unsafe public struct NetworkPackage
     {
+        public int              m_ConnectionID;
         public NetworkCommand   m_Command;
-        public int              m_FromSquare;
-        public int              m_ToSquare;
+        public byte             m_FromSquare;
+        public byte             m_ToSquare;
+        public fixed byte       m_Padding[128];
     };
 
 	// holds all global gamedata
