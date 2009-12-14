@@ -393,7 +393,7 @@ namespace ChessboardControl
 					}
 
 					// show valid moves for current piece
-					if (m_bShowValidMoves && m_bMouseDown &&
+					if (m_bShowValidMoves && m_bMouseDown && m_SelectedSquare >= 0 &&
 						GameData.g_CurrentGameState[m_SelectedSquare] != null &&
 						GameData.g_CurrentGameState[m_SelectedSquare].GetValidMoves().Contains(square))
 					{

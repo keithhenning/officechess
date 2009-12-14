@@ -12,7 +12,8 @@ namespace OfficeChess8
 {
 	public partial class Form1 : Form
 	{
-        Network.Client cl = null;
+        public static Network.Server m_Server = new Network.Server();
+        public static Network.Client m_Client = new Network.Client();
 
 		public Form1()
 		{
@@ -33,18 +34,103 @@ namespace OfficeChess8
 			this.ChessRules.Initialize();
             this.ChessRules.NewGame();
 
-            Network.Server srv = new Network.Server();
-            srv.StartListen();
-
-            cl = new Network.Client();
+            m_Server.SetServerIP("127.0.0.1");
+            m_Server.SetServerPort(12345);
+            m_Server.OnNetworkError += NetworkError;
+            m_Server.OnNetworkReceivedData += ServerDataReceived;
+            
+            m_Client.SetTargetIP("127.0.0.1");
+            m_Client.SetTargetPort(12345);
+            m_Client.OnNetworkError += NetworkError;
 		}
+
+        private void NetworkError(String errorMsg)
+        {
+            Console.WriteLine("NETWORK ERROR OCCURED: " + errorMsg);
+        }
+
+        private void ServerDataReceived(NetworkPackage nwPackage)
+        {
+            // make sure we only process data from correct client
+            if ( m_Server.GetConnectionID() != 0 && m_Server.GetConnectionID() != nwPackage.m_ConnectionID )
+            {
+                Console.WriteLine("Received data from unknown client, discarding...");
+            }
+            // if we have not yet received any data, start playing with this client
+            else if ( m_Server.GetConnectionID() == 0 && nwPackage.m_Command == NetworkCommand.NEW_GAME )
+            {
+                m_Server.SetConnectionID(nwPackage.m_ConnectionID);
+                m_Client.SetConnectionID(nwPackage.m_ConnectionID);
+                this.ChessRules.NewGame();
+            }
+            // game in progress
+            else if ( m_Server.GetConnectionID() != 0 )
+            {
+                // process network data
+                switch (nwPackage.m_Command)
+                {
+                    case NetworkCommand.NEW_GAME:
+                    {
+                        m_Server.SetConnectionID( nwPackage.m_ConnectionID );
+                        m_Client.SetConnectionID( nwPackage.m_ConnectionID );
+                        this.ChessRules.NewGame();
+                        break;
+                    }
+                    case NetworkCommand.LOAD_GAME:
+                    {
+                        break;
+                    }
+                    case NetworkCommand.MAKE_MOVE:
+                    {
+                        bool bMoveAllowed = this.ChessRules.IsMoveAllowed(nwPackage.m_FromSquare, nwPackage.m_ToSquare);
+                        if (bMoveAllowed)
+                        {
+                            nwPackage.m_Command = NetworkCommand.MOVE_ACCEPTED;
+                            m_Client.Send(nwPackage);
+                            
+                            this.ChessRules.DoMove(nwPackage.m_FromSquare, nwPackage.m_ToSquare);
+                            this.Chessboard.Invalidate();
+                        }
+                        else
+                        {
+                            nwPackage.m_Command = NetworkCommand.INVALID_MOVE;
+                            m_Client.Send(nwPackage);
+                        }
+                        break;
+                    }
+                    case NetworkCommand.MOVE_ACCEPTED:
+                    {
+                        this.ChessRules.DoMove(nwPackage.m_FromSquare, nwPackage.m_ToSquare);
+                        this.Chessboard.Invalidate();
+                        Console.WriteLine("Network command success...");
+                        break;
+                    }
+                    case NetworkCommand.INVALID_MOVE:
+                    {
+                        Console.WriteLine("Other side reports move is invalid, boards could be out of sync.");
+                        break;
+                    }
+                }
+            }  
+        }
 
 		private void Chessboard_OnMoveMade(int CurrSquare, int TargetSquare)
 		{
 			Console.WriteLine("A move was made from " + CurrSquare.ToString() + " to " + TargetSquare.ToString());
 			
-			bool bMoveAllowed = this.ChessRules.DoMove(CurrSquare, TargetSquare);
+			bool bMoveAllowed = this.ChessRules.IsMoveAllowed(CurrSquare, TargetSquare);
 
+            if (bMoveAllowed)
+            {
+                NetworkPackage nwpack = new NetworkPackage();
+                nwpack.m_Command = NetworkCommand.MAKE_MOVE;
+                nwpack.m_FromSquare = (byte)CurrSquare;
+                nwpack.m_ToSquare = (byte)TargetSquare;
+                nwpack.m_ConnectionID = m_Client.GetConnectionID();
+
+                m_Client.Send(nwpack);
+            }
+            
 			Console.WriteLine( "The rules says... " + ((bMoveAllowed==true) ? "allowed :-)" : "not allowed :-(") );
 		}
 
@@ -75,7 +161,9 @@ namespace OfficeChess8
 
         private void newGameToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.ChessRules.NewGame();
+            NewGameForm ngf = new NewGameForm();
+            ngf.ShowDialog();
+            m_Server.Start();
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -112,14 +200,15 @@ namespace OfficeChess8
 
         private void button1_Click_1(object sender, EventArgs e)
         {
-            cl.Connect("127.0.0.1", 12345);
 
             NetworkPackage nwpack = new NetworkPackage();
-            nwpack.m_Command = NetworkCommand.MAKE_MOVE;
-            nwpack.m_FromSquare = 5;
-            nwpack.m_ToSquare = 16;
+            nwpack.m_Command = NetworkCommand.NEW_GAME;
+            nwpack.m_FromSquare = 0xFF;
+            nwpack.m_ToSquare = 0xFF;
+            nwpack.m_ConnectionID = m_Client.GetConnectionID();
+            m_Server.SetConnectionID(m_Client.GetConnectionID());
 
-            cl.Send(Etc.ObjectToByteArray(nwpack));
+            m_Client.Send(nwpack);
         }
 	}
 }

@@ -54,7 +54,7 @@ namespace ChessLogic
         }
 
         // evaluates the move
-        private bool IsMoveAllowed(int CurrentSquare, int TargetSquare)
+        public bool IsMoveAllowed(int CurrentSquare, int TargetSquare)
         {
             bool bCanMove = false;
 
