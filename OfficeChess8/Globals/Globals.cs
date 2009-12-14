@@ -144,6 +144,20 @@ namespace Globals
 		#endregion
 	}
 
+    public enum NetworkCommand
+    {
+        MAKE_MOVE,
+        RESIGN,
+        OFFER_DRAW
+    };
+
+    public struct NetworkPackage
+    {
+        public NetworkCommand   m_Command;
+        public int              m_FromSquare;
+        public int              m_ToSquare;
+    };
+
 	// holds all global gamedata
 	[Serializable]
 	public class SaveData
@@ -164,6 +178,8 @@ namespace Globals
     // current game state data
 	static public class GameData
 	{
+        static public Int32 blah = 1;
+
 		// current gamestate
         static public PrototypePiece[] g_CurrentGameState = new PrototypePiece[64];
 
