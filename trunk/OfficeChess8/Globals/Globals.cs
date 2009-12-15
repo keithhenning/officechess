@@ -147,14 +147,27 @@ namespace Globals
     // possible network commands
     public enum NetworkCommand : byte
     {
-        NEW_GAME,
-        LOAD_GAME,
-        MAKE_MOVE,
-        RESIGN,
-        OFFER_DRAW,
-        SYNC_BOARD,
-        INVALID_MOVE,
-        MOVE_ACCEPTED
+        CONNECT_REQUEST,
+        CONNECT_ACCEPT,
+        CONNECT_DENY,
+        DISCONNECT_REQUEST,
+        DISCONNECT_ACCEPT,
+        DISCONNECT_DENY,
+        NEW_GAME_REQUEST,
+        NEW_GAME_ACCEPT,
+        NEW_GAME_DENY,
+        MAKE_MOVE_REQUEST,
+        MAKE_MOVE_ACCEPT,
+        MAKE_MOVE_DENY,
+        TAKE_BACK_MOVE_REQUEST,
+        TAKE_BACK_MOVE_ACCEPT,
+        TAKE_BACK_MOVE_DENY,
+        OFFER_DRAW_REQUEST,
+        OFFER_DRAW_ACCEPT,
+        OFFER_DRAW_DENY,
+        RESIGN_REQUEST,
+        RESIGN_ACCEPT,
+        RESIGN_DENY
     };
 
     // package used to send and receive data from clients
@@ -188,7 +201,8 @@ namespace Globals
     // current game state data
 	static public class GameData
 	{
-        static public Int32 blah = 1;
+        // connection ID for network
+        static public int g_ConnectionID = 0;
 
 		// current gamestate
         static public PrototypePiece[] g_CurrentGameState = new PrototypePiece[64];

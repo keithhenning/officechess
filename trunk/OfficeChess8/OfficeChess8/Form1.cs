@@ -20,10 +20,9 @@ namespace OfficeChess8
 			InitializeComponent();
 		}
 
-		private void Form1_Load(object sender, EventArgs e)
-		{
-		}
-
+        //////////////////////////////////////////////////////////////////////////////////////////////////
+        // INITALIZATION
+        //////////////////////////////////////////////////////////////////////////////////////////////////
 		private void Chessboard_Load(object sender, EventArgs e)
 		{
 			// make the chess board load his assets
@@ -42,8 +41,51 @@ namespace OfficeChess8
             m_Client.SetTargetIP("127.0.0.1");
             m_Client.SetTargetPort(12345);
             m_Client.OnNetworkError += NetworkError;
+
+            // hide taskbar icon
+            notifyIcon1.Visible = false;
 		}
 
+        //////////////////////////////////////////////////////////////////////////////////////////////////
+        // FORM METHODS
+        //////////////////////////////////////////////////////////////////////////////////////////////////
+        private void Form1_Resize(object sender, EventArgs e)
+        {
+            // hide when minimized, we have a taskbar icon for that
+            if (WindowState == FormWindowState.Minimized)
+            {
+                Hide();
+
+                // show taskbar icon
+                notifyIcon1.Visible = true;
+            }
+            else
+            {
+                // hide taskbar icon
+                notifyIcon1.Visible = false;
+            }
+        }
+
+        private void notifyIcon1_DoubleClick(object sender, EventArgs e)
+        {
+            // show form when taskbar icon was double clicked
+            Show();
+            WindowState = FormWindowState.Normal;
+        }
+
+        private void toolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            quitToolStripMenuItem_Click(sender, e);
+        }
+        
+        private void toolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            notifyIcon1_DoubleClick(sender, e);
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////
+        // NETWORK METHODS
+        //////////////////////////////////////////////////////////////////////////////////////////////////
         private void NetworkError(String errorMsg)
         {
             Console.WriteLine("NETWORK ERROR OCCURED: " + errorMsg);
@@ -51,101 +93,163 @@ namespace OfficeChess8
 
         private void ServerDataReceived(NetworkPackage nwPackage)
         {
-            // make sure we only process data from correct client
-            if ( m_Server.GetConnectionID() != 0 && m_Server.GetConnectionID() != nwPackage.m_ConnectionID )
-            {
-                Console.WriteLine("Received data from unknown client, discarding...");
-            }
             // if we have not yet received any data, start playing with this client
-            else if ( m_Server.GetConnectionID() == 0 && nwPackage.m_Command == NetworkCommand.NEW_GAME )
+            if (GameData.g_ConnectionID == 0 && nwPackage.m_Command == NetworkCommand.CONNECT_REQUEST)
             {
-                m_Server.SetConnectionID(nwPackage.m_ConnectionID);
-                m_Client.SetConnectionID(nwPackage.m_ConnectionID);
-                this.ChessRules.NewGame();
+                // store our new connection ID, blocking transmissions from other sources
+                GameData.g_ConnectionID = nwPackage.m_ConnectionID;
+
+                // let other side know we agree
+                nwPackage.m_Command = NetworkCommand.CONNECT_ACCEPT;
+                m_Client.Send(nwPackage);
             }
             // game in progress
-            else if ( m_Server.GetConnectionID() != 0 )
+            else if (GameData.g_ConnectionID != 0)
             {
-                // process network data
-                switch (nwPackage.m_Command)
+                // make sure connection ID's match up
+                if (GameData.g_ConnectionID != nwPackage.m_ConnectionID)
                 {
-                    case NetworkCommand.NEW_GAME:
-                    {
-                        m_Server.SetConnectionID( nwPackage.m_ConnectionID );
-                        m_Client.SetConnectionID( nwPackage.m_ConnectionID );
-                        this.ChessRules.NewGame();
-                        break;
-                    }
-                    case NetworkCommand.LOAD_GAME:
-                    {
-                        break;
-                    }
-                    case NetworkCommand.MAKE_MOVE:
-                    {
-                        bool bMoveAllowed = this.ChessRules.IsMoveAllowed(nwPackage.m_FromSquare, nwPackage.m_ToSquare);
-                        if (bMoveAllowed)
-                        {
-                            nwPackage.m_Command = NetworkCommand.MOVE_ACCEPTED;
-                            m_Client.Send(nwPackage);
-                            
-                            this.ChessRules.DoMove(nwPackage.m_FromSquare, nwPackage.m_ToSquare);
-                            this.Chessboard.Invalidate();
-                        }
-                        else
-                        {
-                            nwPackage.m_Command = NetworkCommand.INVALID_MOVE;
-                            m_Client.Send(nwPackage);
-                        }
-                        break;
-                    }
-                    case NetworkCommand.MOVE_ACCEPTED:
-                    {
-                        this.ChessRules.DoMove(nwPackage.m_FromSquare, nwPackage.m_ToSquare);
-                        this.Chessboard.Invalidate();
-                        Console.WriteLine("Network command success...");
-                        break;
-                    }
-                    case NetworkCommand.INVALID_MOVE:
-                    {
-                        Console.WriteLine("Other side reports move is invalid, boards could be out of sync.");
-                        break;
-                    }
+                    NetworkError("Received data from unknown client, discarding...");
+                }
+                else
+                {
+                    // process data
+                    ProcessNetworkData(nwPackage);
                 }
             }  
         }
 
+        private void ProcessNetworkData(NetworkPackage nwPackage)
+        {
+            // process network data
+            switch (nwPackage.m_Command)
+            {
+                case NetworkCommand.CONNECT_ACCEPT:
+                {
+                    // if these aren't the same there is a problem
+                    if (GameData.g_ConnectionID != nwPackage.m_ConnectionID)
+                    {
+                        NetworkError("Connection ID's do not match up while connecting... abort.");
+                        GameData.g_ConnectionID = 0;
+                    }
+
+                    Console.WriteLine("Connection synchronized...");
+
+                    break;
+                }
+                case NetworkCommand.NEW_GAME_REQUEST:
+                {
+                    // reset board
+                    this.ChessRules.NewGame();
+
+                    // let other side know we agree
+                    nwPackage.m_Command = NetworkCommand.NEW_GAME_ACCEPT;
+                    m_Client.Send(nwPackage);
+
+                    break;
+                }
+                case NetworkCommand.NEW_GAME_ACCEPT:
+                {
+                    // other side accepted, reset board
+                    this.ChessRules.NewGame();
+
+                    break;
+                }
+                case NetworkCommand.MAKE_MOVE_REQUEST:
+                {
+                    bool bMoveAllowed = this.ChessRules.IsMoveAllowed(nwPackage.m_FromSquare, nwPackage.m_ToSquare);
+                    if (bMoveAllowed)
+                    {
+                        // move is allowed, let other side know
+                        nwPackage.m_Command = NetworkCommand.MAKE_MOVE_ACCEPT;
+                        m_Client.Send(nwPackage);
+
+                        // make the actual move
+                        this.ChessRules.DoMove(nwPackage.m_FromSquare, nwPackage.m_ToSquare);
+
+                        // update the board
+                        this.Chessboard.Invalidate();
+
+                        // notify user
+                        notifyIcon1.ShowBalloonTip(1, "", "A move was made from " + nwPackage.m_FromSquare.ToString() + " to " + nwPackage.m_ToSquare.ToString(), ToolTipIcon.Info);
+                    }
+                    else
+                    {
+                        // let other side know we do not agree with this move
+                        nwPackage.m_Command = NetworkCommand.MAKE_MOVE_DENY;
+                        m_Client.Send(nwPackage);
+                    }
+                    break;
+                }
+                case NetworkCommand.MAKE_MOVE_ACCEPT:
+                {
+                    // move was accepted by the other side, make move
+                    this.ChessRules.DoMove(nwPackage.m_FromSquare, nwPackage.m_ToSquare);
+
+                    // update the board
+                    this.Chessboard.Invalidate();
+
+                    break;
+                }
+                case NetworkCommand.MAKE_MOVE_DENY:
+                {
+                    NetworkError("Other side reports move is invalid, boards could be out of sync.");
+                    break;
+                }
+                default:
+                {
+                    NetworkError("Handling unspecified case!");
+                    break;
+                }
+            }
+
+
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////
+        // CHESSBOARD METHODS
+        //////////////////////////////////////////////////////////////////////////////////////////////////
+        // update our status bar
+        private void Chessboard_MouseMove(object sender, MouseEventArgs e)
+        {
+            int curCol = Etc.Clamp(this.Chessboard.GetMouseColPosition(), 0, 7)     + 1;
+            int curRow = Etc.Clamp(this.Chessboard.GetMouseRowPosition(), 0, 7)     + 1;
+            int curSqu = Etc.Clamp(this.Chessboard.GetMouseSquarePosition(), 0, 63) + 1;
+
+            this.toolStripStatusLabel1.Text = "Column: " + curCol.ToString() + " row: " + curRow.ToString() + " square: " + curSqu.ToString();
+        }
+
+        // try to make the move
 		private void Chessboard_OnMoveMade(int CurrSquare, int TargetSquare)
 		{
 			Console.WriteLine("A move was made from " + CurrSquare.ToString() + " to " + TargetSquare.ToString());
 			
 			bool bMoveAllowed = this.ChessRules.IsMoveAllowed(CurrSquare, TargetSquare);
+            
+            Console.WriteLine("The rules says... " + ((bMoveAllowed == true) ? "allowed :-)" : "not allowed :-("));
 
+            // send through network
             if (bMoveAllowed)
             {
                 NetworkPackage nwpack = new NetworkPackage();
-                nwpack.m_Command = NetworkCommand.MAKE_MOVE;
+                nwpack.m_Command = NetworkCommand.MAKE_MOVE_REQUEST;
                 nwpack.m_FromSquare = (byte)CurrSquare;
                 nwpack.m_ToSquare = (byte)TargetSquare;
-                nwpack.m_ConnectionID = m_Client.GetConnectionID();
+                nwpack.m_ConnectionID = GameData.g_ConnectionID;
 
                 m_Client.Send(nwpack);
             }
-            
-			Console.WriteLine( "The rules says... " + ((bMoveAllowed==true) ? "allowed :-)" : "not allowed :-(") );
 		}
 
-		private void button1_Click(object sender, EventArgs e)
-		{
-			GameData.SaveToFile("savegame.ocs");
-		}
-
-		private void button2_Click(object sender, EventArgs e)
-		{
-			GameData.LoadFromFile("savegame.ocs");
-		}
-
+        //////////////////////////////////////////////////////////////////////////////////////////////////
+        // MENU METHODS
+        //////////////////////////////////////////////////////////////////////////////////////////////////
         private void quitToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            // stop listening
+            m_Server.Stop();
+
+            // exit
             Application.Exit();
         }
 
@@ -163,29 +267,6 @@ namespace OfficeChess8
         {
             NewGameForm ngf = new NewGameForm();
             ngf.ShowDialog();
-            m_Server.Start();
-        }
-
-        private void timer1_Tick(object sender, EventArgs e)
-        {
-
-        }
-
-        private void Chessboard_MouseMove(object sender, MouseEventArgs e)
-        {
-            int curCol = this.Chessboard.GetMouseColPosition();
-            if (curCol < 0)
-                curCol = 0;
-
-            int curRow = this.Chessboard.GetMouseRowPosition();
-            if (curRow < 0)
-                curRow = 0;
-
-            int curSqu = this.Chessboard.GetMouseSquarePosition();
-            if (curSqu < 0)
-                curSqu = 0;
-
-            this.toolStripStatusLabel1.Text = "Column: " + curCol.ToString() + " row: " + curRow.ToString() + " square: " + curSqu.ToString();
         }
 
         private void showAttackedSquaresToolStripMenuItem_Click(object sender, EventArgs e)
@@ -198,17 +279,64 @@ namespace OfficeChess8
             this.Chessboard.SetShowValidMoves(showValidMovesToolStripMenuItem.Checked);
         }
 
-        private void button1_Click_1(object sender, EventArgs e)
+        private void resignToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            // send resign message to other side
             NetworkPackage nwpack = new NetworkPackage();
-            nwpack.m_Command = NetworkCommand.NEW_GAME;
-            nwpack.m_FromSquare = 0xFF;
-            nwpack.m_ToSquare = 0xFF;
-            nwpack.m_ConnectionID = m_Client.GetConnectionID();
-            m_Server.SetConnectionID(m_Client.GetConnectionID());
+            nwpack.m_Command = NetworkCommand.RESIGN_REQUEST;
+            nwpack.m_FromSquare = 0;
+            nwpack.m_ToSquare = 0;
+            nwpack.m_ConnectionID = GameData.g_ConnectionID;
 
             m_Client.Send(nwpack);
+        }
+
+        private void offerDrawToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // send draw offer message to other side
+            NetworkPackage nwpack = new NetworkPackage();
+            nwpack.m_Command = NetworkCommand.OFFER_DRAW_REQUEST;
+            nwpack.m_FromSquare = 0;
+            nwpack.m_ToSquare = 0;
+            nwpack.m_ConnectionID = GameData.g_ConnectionID;
+
+            m_Client.Send(nwpack);
+        }
+
+        private void takeBackMoveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // send take back move request message to other side
+            NetworkPackage nwpack = new NetworkPackage();
+            nwpack.m_Command = NetworkCommand.TAKE_BACK_MOVE_REQUEST;
+            nwpack.m_FromSquare = (byte)GameData.g_LastMove.FromSquare;
+            nwpack.m_ToSquare = (byte)GameData.g_LastMove.ToSquare;
+            nwpack.m_ConnectionID = GameData.g_ConnectionID;
+
+            m_Client.Send(nwpack);
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////
+        // DEBUG METHODS
+        //////////////////////////////////////////////////////////////////////////////////////////////////
+        private void button1_Click(object sender, EventArgs e)
+        {
+            m_Server.Stop();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            m_Server.Start();
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            // send take back move request message to other side
+            NetworkPackage nwpack = new NetworkPackage();
+            nwpack.m_Command = NetworkCommand.CONNECT_REQUEST;
+
+            m_Client.Send(nwpack);
+
+            // TODO: build timer for connection request time-out
         }
 	}
 }

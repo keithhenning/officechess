@@ -19,7 +19,6 @@ namespace Network
 
         // MISC MEMBERS //////////////////////////////////////////////////////////////////////////
         protected byte[]        m_LastReceivedData = new byte[MAX_PACKET_SIZE];
-        protected Int32         m_ConnectionID = 0;
 
         // EVENTS  ///////////////////////////////////////////////////////////////////////////////
         public delegate void NotifyNetworkError(String errorMsg);
@@ -30,13 +29,13 @@ namespace Network
         // returns current connection id
         public int GetConnectionID()
         {
-            return m_ConnectionID;
+            return GameData.g_ConnectionID;
         }
 
         // returns current connection id
         public void SetConnectionID(int connID)
         {
-            m_ConnectionID = connID;
+            GameData.g_ConnectionID = connID;
         }
     }
 }
