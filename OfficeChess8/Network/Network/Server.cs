@@ -19,6 +19,7 @@ namespace Network
         private Socket      	        m_ClientSocket = null;
         private IPAddress               m_ServerIP = IPAddress.Parse(DEFAULT_IP);
         private Int32                   m_ServerPort = DEFAULT_PORT;
+        private volatile bool           m_bRunThread = true;
 
         // set server IP
         public void SetServerIP(String ipAddress)
@@ -41,6 +42,7 @@ namespace Network
             try
             {
                 // start listening thread
+                m_bRunThread = true;
                 m_tServerThread = new Thread(new ThreadStart(ServerTask));
                 m_tServerThread.IsBackground = true;
                 m_tServerThread.Name = "OfficeChessServerListenThread";
@@ -49,6 +51,25 @@ namespace Network
             catch (SystemException e)
             {
                 OnNetworkError("Unable to start listening thread - " + e.Message);
+                return false;
+            }
+
+            return true;
+        }
+
+        // stops this server
+        public bool Stop()
+        {
+            try
+            {
+                // stop listening thread
+                m_bRunThread = false;
+                m_TCPListener.Stop();
+                Console.WriteLine("Listener has stopped...");
+            }
+            catch (SystemException e)
+            {
+                OnNetworkError("Unable to stop listening thread - " + e.Message);
                 return false;
             }
 
@@ -65,7 +86,7 @@ namespace Network
 				m_TCPListener.Start();
 				Console.WriteLine("Listening for incoming data...");
 
-				while (true)
+                while (m_bRunThread)
 				{
                     // block until connection established
                     m_ClientSocket = m_TCPListener.AcceptSocket();

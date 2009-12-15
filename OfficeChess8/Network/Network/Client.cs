@@ -17,12 +17,6 @@ namespace Network
         private IPAddress   m_TargetIP;
         private Int32       m_TargetPort;
 
-        public Client()
-        {
-            // get unique hash code for this connection
-            m_ConnectionID = this.GetHashCode();
-        }
-
         // set target IP for this client
         public void SetTargetIP(String ipAddress)
         {
@@ -39,8 +33,18 @@ namespace Network
         }
 
         // send object to connected server
-        public bool Send(object objectToSend)
+        public bool Send(NetworkPackage objectToSend)
         {
+            // make sure we have a valid connection id
+            if (GameData.g_ConnectionID == 0)
+            {
+                OnNetworkError("Trying to send data without a valid connection! Trying to generate one now");
+
+                // try to assign new connectionID
+                GenerateConnectionID();
+                objectToSend.m_ConnectionID = GameData.g_ConnectionID;
+            }
+
             try
             {
                 // start listening thread
@@ -56,6 +60,12 @@ namespace Network
             }
 
             return true;
+        }
+
+        // generates unique id for this connection
+        private void GenerateConnectionID()
+        {
+            GameData.g_ConnectionID = this.GetHashCode();
         }
 
         // send thread
