@@ -14,6 +14,7 @@ namespace OfficeChess8
 	{
         public static Network.Server m_Server = new Network.Server();
         public static Network.Client m_Client = new Network.Client();
+        private bool m_bNetworkGame = false;
 
 		public Form1()
 		{
@@ -33,11 +34,14 @@ namespace OfficeChess8
 			this.ChessRules.Initialize();
             this.ChessRules.NewGame();
 
+            // setup server
             m_Server.SetServerIP("127.0.0.1");
             m_Server.SetServerPort(12345);
             m_Server.OnNetworkError += NetworkError;
             m_Server.OnNetworkReceivedData += ServerDataReceived;
+            m_Server.Start();
             
+            // setup client
             m_Client.SetTargetIP("127.0.0.1");
             m_Client.SetTargetPort(12345);
             m_Client.OnNetworkError += NetworkError;
@@ -75,12 +79,21 @@ namespace OfficeChess8
 
         private void toolStripMenuItem2_Click(object sender, EventArgs e)
         {
+            // quit app
             quitToolStripMenuItem_Click(sender, e);
         }
         
         private void toolStripMenuItem1_Click(object sender, EventArgs e)
         {
+            // show app
             notifyIcon1_DoubleClick(sender, e);
+        }
+
+        private void networkToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // show network settings form
+            NetworkSettingsForm nwsf = new NetworkSettingsForm();
+            nwsf.ShowDialog();
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -102,6 +115,7 @@ namespace OfficeChess8
                 // let other side know we agree
                 nwPackage.m_Command = NetworkCommand.CONNECT_ACCEPT;
                 m_Client.Send(nwPackage);
+                m_bNetworkGame = true;
             }
             // game in progress
             else if (GameData.g_ConnectionID != 0)
@@ -134,6 +148,7 @@ namespace OfficeChess8
                     }
 
                     Console.WriteLine("Connection synchronized...");
+                    m_bNetworkGame = true;
 
                     break;
                 }
@@ -171,7 +186,9 @@ namespace OfficeChess8
                         this.Chessboard.Invalidate();
 
                         // notify user
-                        notifyIcon1.ShowBalloonTip(1, "", "A move was made from " + nwPackage.m_FromSquare.ToString() + " to " + nwPackage.m_ToSquare.ToString(), ToolTipIcon.Info);
+                        string from = Etc.SquareToString(nwPackage.m_FromSquare);
+                        string to = Etc.SquareToString(nwPackage.m_ToSquare);
+                        notifyIcon1.ShowBalloonTip(1, "OfficeChess", "A move was made from " + from + " to " + to, ToolTipIcon.Info);
                     }
                     else
                     {
@@ -231,13 +248,27 @@ namespace OfficeChess8
             // send through network
             if (bMoveAllowed)
             {
-                NetworkPackage nwpack = new NetworkPackage();
-                nwpack.m_Command = NetworkCommand.MAKE_MOVE_REQUEST;
-                nwpack.m_FromSquare = (byte)CurrSquare;
-                nwpack.m_ToSquare = (byte)TargetSquare;
-                nwpack.m_ConnectionID = GameData.g_ConnectionID;
+                // if network game, ask other side to concur with this move
+                if (m_bNetworkGame)
+                {
+                    NetworkPackage nwpack = new NetworkPackage();
+                    nwpack.m_Command = NetworkCommand.MAKE_MOVE_REQUEST;
+                    nwpack.m_FromSquare = (byte)CurrSquare;
+                    nwpack.m_ToSquare = (byte)TargetSquare;
+                    nwpack.m_ConnectionID = GameData.g_ConnectionID;
 
-                m_Client.Send(nwpack);
+                    m_Client.Send(nwpack);
+                }
+                // otherwise just do the move
+                else
+                {
+                    this.ChessRules.DoMove(CurrSquare, TargetSquare);
+
+                    // notify user
+                    string from = Etc.SquareToString(CurrSquare);
+                    string to = Etc.SquareToString(TargetSquare);
+                    notifyIcon1.ShowBalloonTip(1, "OfficeChess", "A move was made from " + from + " to " + to, ToolTipIcon.Info);
+                }
             }
 		}
 
@@ -265,8 +296,7 @@ namespace OfficeChess8
 
         private void newGameToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            NewGameForm ngf = new NewGameForm();
-            ngf.ShowDialog();
+
         }
 
         private void showAttackedSquaresToolStripMenuItem_Click(object sender, EventArgs e)
@@ -310,6 +340,19 @@ namespace OfficeChess8
             nwpack.m_Command = NetworkCommand.TAKE_BACK_MOVE_REQUEST;
             nwpack.m_FromSquare = (byte)GameData.g_LastMove.FromSquare;
             nwpack.m_ToSquare = (byte)GameData.g_LastMove.ToSquare;
+            nwpack.m_ConnectionID = GameData.g_ConnectionID;
+
+            m_Client.Send(nwpack);
+        }
+
+
+        private void newGameToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            // send new game request message to other side
+            NetworkPackage nwpack = new NetworkPackage();
+            nwpack.m_Command = NetworkCommand.NEW_GAME_REQUEST;
+            nwpack.m_FromSquare = 0;
+            nwpack.m_ToSquare = 0;
             nwpack.m_ConnectionID = GameData.g_ConnectionID;
 
             m_Client.Send(nwpack);

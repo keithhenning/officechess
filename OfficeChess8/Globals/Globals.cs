@@ -349,6 +349,20 @@ namespace Globals
                 return false;
             }
 		}
+		
+        // returns human readable board coordinate
+		static public string SquareToString(int square)
+		{
+            string resultString = "";
+			int row;
+			int col;
+			
+			GetRowColFromSquare(square, out row, out col);
+            resultString = ((char)(65 + col)).ToString();
+            resultString += (row+1).ToString();
+
+            return resultString;
+		}
 
         // serialize object to byte array
         static public byte[] ObjectToByteArray(object anything)
