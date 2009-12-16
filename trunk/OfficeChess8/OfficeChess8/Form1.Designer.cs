@@ -50,11 +50,14 @@ namespace OfficeChess8
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
-            this.Chessboard = new ChessboardControl.Chessboard();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
+            this.newGameToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.networkToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.Chessboard = new ChessboardControl.Chessboard();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
@@ -68,16 +71,17 @@ namespace OfficeChess8
             this.aboutToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(808, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(795, 24);
             this.menuStrip1.TabIndex = 3;
             this.menuStrip1.Text = "menuStrip1";
             // 
             // fileToolStripMenuItem
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.newGameToolStripMenuItem,
+            this.newGameToolStripMenuItem1,
             this.saveGameToolStripMenuItem,
             this.loadGameToolStripMenuItem,
+            this.newGameToolStripMenuItem,
             this.quitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(35, 20);
@@ -85,6 +89,9 @@ namespace OfficeChess8
             // 
             // newGameToolStripMenuItem
             // 
+            this.newGameToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.networkToolStripMenuItem,
+            this.saveSettingsToolStripMenuItem});
             this.newGameToolStripMenuItem.Name = "newGameToolStripMenuItem";
             this.newGameToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
             this.newGameToolStripMenuItem.Text = "Settings";
@@ -191,7 +198,7 @@ namespace OfficeChess8
             this.toolStripStatusLabel1});
             this.statusStrip1.Location = new System.Drawing.Point(0, 552);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(808, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(795, 22);
             this.statusStrip1.TabIndex = 4;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -203,7 +210,7 @@ namespace OfficeChess8
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(530, 56);
+            this.button1.Location = new System.Drawing.Point(553, 56);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 5;
@@ -213,7 +220,7 @@ namespace OfficeChess8
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(530, 27);
+            this.button2.Location = new System.Drawing.Point(553, 27);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(75, 23);
             this.button2.TabIndex = 6;
@@ -223,23 +230,13 @@ namespace OfficeChess8
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(611, 27);
+            this.button3.Location = new System.Drawing.Point(634, 27);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(75, 52);
             this.button3.TabIndex = 7;
             this.button3.Text = "Connect to target";
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
-            // 
-            // Chessboard
-            // 
-            this.Chessboard.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.Chessboard.Location = new System.Drawing.Point(12, 27);
-            this.Chessboard.Name = "Chessboard";
-            this.Chessboard.Size = new System.Drawing.Size(512, 512);
-            this.Chessboard.TabIndex = 0;
-            this.Chessboard.Load += new System.EventHandler(this.Chessboard_Load);
-            this.Chessboard.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Chessboard_MouseMove);
             // 
             // notifyIcon1
             // 
@@ -249,6 +246,7 @@ namespace OfficeChess8
             this.notifyIcon1.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon")));
             this.notifyIcon1.Text = "OfficeChess";
             this.notifyIcon1.Visible = true;
+            this.notifyIcon1.BalloonTipClicked += new System.EventHandler(this.notifyIcon1_DoubleClick);
             this.notifyIcon1.DoubleClick += new System.EventHandler(this.notifyIcon1_DoubleClick);
             // 
             // contextMenuStrip1
@@ -273,15 +271,45 @@ namespace OfficeChess8
             this.toolStripMenuItem2.Text = "Close";
             this.toolStripMenuItem2.Click += new System.EventHandler(this.toolStripMenuItem2_Click);
             // 
+            // newGameToolStripMenuItem1
+            // 
+            this.newGameToolStripMenuItem1.Name = "newGameToolStripMenuItem1";
+            this.newGameToolStripMenuItem1.Size = new System.Drawing.Size(157, 22);
+            this.newGameToolStripMenuItem1.Text = "New game...";
+            this.newGameToolStripMenuItem1.Click += new System.EventHandler(this.newGameToolStripMenuItem1_Click);
+            // 
+            // networkToolStripMenuItem
+            // 
+            this.networkToolStripMenuItem.Name = "networkToolStripMenuItem";
+            this.networkToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
+            this.networkToolStripMenuItem.Text = "Network";
+            this.networkToolStripMenuItem.Click += new System.EventHandler(this.networkToolStripMenuItem_Click);
+            // 
+            // saveSettingsToolStripMenuItem
+            // 
+            this.saveSettingsToolStripMenuItem.Name = "saveSettingsToolStripMenuItem";
+            this.saveSettingsToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
+            this.saveSettingsToolStripMenuItem.Text = "Save settings";
+            // 
+            // Chessboard
+            // 
+            this.Chessboard.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.Chessboard.Location = new System.Drawing.Point(12, 27);
+            this.Chessboard.Name = "Chessboard";
+            this.Chessboard.Size = new System.Drawing.Size(512, 512);
+            this.Chessboard.TabIndex = 0;
+            this.Chessboard.Load += new System.EventHandler(this.Chessboard_Load);
+            this.Chessboard.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Chessboard_MouseMove);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(808, 574);
-            this.Controls.Add(this.button3);
+            this.ClientSize = new System.Drawing.Size(795, 574);
             this.Controls.Add(this.button2);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.button3);
             this.Controls.Add(this.statusStrip1);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.Chessboard);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
@@ -327,6 +355,9 @@ namespace OfficeChess8
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
+        private System.Windows.Forms.ToolStripMenuItem newGameToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem networkToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem saveSettingsToolStripMenuItem;
 
 	}
 }
