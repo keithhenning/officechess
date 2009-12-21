@@ -99,9 +99,9 @@ namespace OfficeChess8
         //////////////////////////////////////////////////////////////////////////////////////////////////
         // NETWORK METHODS
         //////////////////////////////////////////////////////////////////////////////////////////////////
-        private void NetworkError(String errorMsg)
+        private void NetworkError(Exception e)
         {
-            Console.WriteLine("NETWORK ERROR OCCURED: " + errorMsg);
+            Console.WriteLine("NETWORK ERROR OCCURED: " + e.Message);
         }
 
         private void ServerDataReceived(NetworkPackage nwPackage)
@@ -123,7 +123,8 @@ namespace OfficeChess8
                 // make sure connection ID's match up
                 if (GameData.g_ConnectionID != nwPackage.m_ConnectionID)
                 {
-                    NetworkError("Received data from unknown client, discarding...");
+                    Exception e = new Exception("Received data from unknown client, discarding...");
+                    NetworkError(e);
                 }
                 else
                 {
@@ -143,7 +144,8 @@ namespace OfficeChess8
                     // if these aren't the same there is a problem
                     if (GameData.g_ConnectionID != nwPackage.m_ConnectionID)
                     {
-                        NetworkError("Connection ID's do not match up while connecting... abort.");
+                        Exception e = new Exception("Connection ID's do not match up while connecting... abort.");
+                        NetworkError(e);
                         GameData.g_ConnectionID = 0;
                     }
 
@@ -210,12 +212,14 @@ namespace OfficeChess8
                 }
                 case NetworkCommand.MAKE_MOVE_DENY:
                 {
-                    NetworkError("Other side reports move is invalid, boards could be out of sync.");
+                    Exception e = new Exception("Other side reports move is invalid, boards could be out of sync.");
+                    NetworkError(e);
                     break;
                 }
                 default:
                 {
-                    NetworkError("Handling unspecified case!");
+                    Exception e = new Exception("Handling unspecified case!");
+                    NetworkError(e);
                     break;
                 }
             }

@@ -5,6 +5,7 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 namespace Globals
 {
@@ -12,10 +13,10 @@ namespace Globals
 	public enum VersionInformation : uint
 	{
 		GAME_VERSION = 1,
-		SAVEGAME_FILEVERSION = 101,
+		SAVEGAME_FILEVERSION = 102,
 	}
 
-    // defines the actual vlaue of a piece
+    // defines the actual value of a piece
     public enum PValue : int
     {
         None = 0,
@@ -180,6 +181,15 @@ namespace Globals
         public byte             m_ToSquare;
         public fixed byte       m_Padding[128];
     };
+    
+    // last move data
+    [Serializable]
+    public class AMove
+    {
+        public PColor ColorMoved;
+        public int FromSquare;
+        public int ToSquare;
+    }
 
 	// holds all global gamedata
 	[Serializable]
@@ -188,15 +198,8 @@ namespace Globals
 		public uint FileVersion = (uint)VersionInformation.SAVEGAME_FILEVERSION;
 		public PrototypePiece[] CurrentGameState = new PrototypePiece[64];
 		public PColor ColorMoving = PColor.White;
+        public List<AMove> MoveHistory = new List<AMove>();
 	}
-
-    // last move data
-    public class AMove
-    {
-        public PColor ColorMoved;
-        public int FromSquare;
-        public int ToSquare;
-    }
 
     // current game state data
 	static public class GameData
@@ -216,6 +219,7 @@ namespace Globals
 
 		static public PColor g_ColorMoving = PColor.White;
 
+        static public List<AMove> g_MoveHistory = new List<AMove>();
         static public AMove g_LastMove = new AMove();
 
 		// classic starting positions 
@@ -240,6 +244,7 @@ namespace Globals
 				SaveData sd = new SaveData();
 				sd.CurrentGameState = g_CurrentGameState;
 				sd.ColorMoving = g_ColorMoving;
+                sd.MoveHistory = g_MoveHistory;
 
 				// save to file
 				BinaryFormatter bf = new BinaryFormatter();
@@ -250,9 +255,9 @@ namespace Globals
 				fs.Close();
 				Console.WriteLine("Successfully saved game to: " + FileName);
 			}
-			catch
+			catch (Exception e)
 			{
-				Console.WriteLine("ERROR: unable to save file..." + FileName);
+				Console.WriteLine("ERROR: unable to save file..." + FileName + " " +e.Message );
                 return false;
 			}
 
@@ -281,6 +286,8 @@ namespace Globals
 					// restore savegame data
 					GameData.g_CurrentGameState = sd.CurrentGameState;
 					GameData.g_ColorMoving = sd.ColorMoving;
+                    GameData.g_MoveHistory = sd.MoveHistory;
+                    GameData.g_LastMove = GameData.g_MoveHistory[GameData.g_MoveHistory.Count - 1];
 					Console.WriteLine("Successfully loaded saved game: " + FileName);
 				}
 				else
@@ -289,11 +296,12 @@ namespace Globals
                     return false;
 				}
 			}
-			catch
-			{
-				Console.WriteLine("ERROR: unable to open file: " + FileName);
+            catch (Exception e)
+            {
+                Console.WriteLine("ERROR: unable to open file..." + FileName + " " + e.Message);
                 return false;
-			}
+            }
+
 
 			return true;
 		}

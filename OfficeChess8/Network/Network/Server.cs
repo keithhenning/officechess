@@ -26,7 +26,8 @@ namespace Network
         {
             if (!IPAddress.TryParse(ipAddress, out m_ServerIP))
             {
-                OnNetworkError("Unable to parse IP address.");
+                Exception e = new Exception("Unable to parse IP address.");
+                OnNetworkError(e);
             }
         }
 
@@ -50,7 +51,7 @@ namespace Network
             }
             catch (SystemException e)
             {
-                OnNetworkError("Unable to start listening thread - " + e.Message);
+                OnNetworkError(e);
                 return false;
             }
 
@@ -69,7 +70,7 @@ namespace Network
             }
             catch (SystemException e)
             {
-                OnNetworkError("Unable to stop listening thread - " + e.Message);
+                OnNetworkError(e);
                 return false;
             }
 
@@ -114,11 +115,11 @@ namespace Network
 			}
 			catch (SocketException se)
 			{
-                OnNetworkError(se.Message);
+                OnNetworkError(se);
 			}
             catch (SystemException e)
             {
-                OnNetworkError(e.Message);
+                OnNetworkError(e);
             }
         }
     }

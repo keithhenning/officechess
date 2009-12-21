@@ -23,33 +23,43 @@ namespace OfficeChess8
             IPAddress outIP;
             int outInt;
             if ( !IPAddress.TryParse(textBox4.Text, out outIP) || 
-                 !IPAddress.TryParse(textBox1.Text, out outIP) ||
-                 !Int32.TryParse(textBox2.Text, out outInt) || 
-                 !Int32.TryParse(textBox3.Text, out outInt) ||
-                 (textBox4.Text == textBox1.Text) ) 
+                 !IPAddress.TryParse(textBox1.Text, out outIP) )
             {
-                MessageBox.Show("One of the settings is invalid", "Error", MessageBoxButtons.OK);
+                MessageBox.Show("One of the IP adresses is invalid", "Error", MessageBoxButtons.OK);
+                return;
+            }                
+            else if (!Int32.TryParse(textBox2.Text, out outInt) || 
+                     !Int32.TryParse(textBox3.Text, out outInt) )
+            {
+                MessageBox.Show("One of the port numbers is invalid", "Error", MessageBoxButtons.OK);
+                return;
+            }                 
+            else if (textBox4.Text == textBox1.Text)
+            {
+                MessageBox.Show("Target IP can't be the same as the server IP", "Error", MessageBoxButtons.OK);
                 return;
             }
-
-            // setup server and client
-            try
+            else
             {
-                // configure server
-                Form1.m_Server.SetServerIP(textBox4.Text);
-                Form1.m_Server.SetServerPort(Int32.Parse(textBox3.Text));
+                // setup server and client
+                try
+                {
+                    // configure server
+                    Form1.m_Server.SetServerIP(textBox4.Text);
+                    Form1.m_Server.SetServerPort(Int32.Parse(textBox3.Text));
 
-                // restart server
-                Form1.m_Server.Stop();
-                Form1.m_Server.Start();
+                    // restart server
+                    Form1.m_Server.Stop();
+                    Form1.m_Server.Start();
 
-                // configure client
-                Form1.m_Client.SetTargetIP(textBox1.Text);
-                Form1.m_Client.SetTargetPort(Int32.Parse(textBox2.Text));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
+                    // configure client
+                    Form1.m_Client.SetTargetIP(textBox1.Text);
+                    Form1.m_Client.SetTargetPort(Int32.Parse(textBox2.Text));
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
             }
 
             this.Close();
