@@ -22,7 +22,8 @@ namespace Network
         {
             if (!IPAddress.TryParse(ipAddress, out m_TargetIP))
             {
-                OnNetworkError("Unable to parse IP address.");
+                Exception e = new Exception("Unable to parse IP address.");
+                OnNetworkError(e);
             }
         }
 
@@ -38,7 +39,8 @@ namespace Network
             // make sure we have a valid connection id
             if (GameData.g_ConnectionID == 0)
             {
-                OnNetworkError("Trying to send data without a valid connection! Trying to generate one now");
+                Exception e = new Exception("Trying to send data without a valid connection! Trying to generate one now");
+                OnNetworkError(e);
 
                 // try to assign new connectionID
                 GenerateConnectionID();
@@ -55,7 +57,7 @@ namespace Network
             }
             catch (Exception e)
             {
-                OnNetworkError("SocketException: " + e.Message);
+                OnNetworkError(e);
                 return false;
             }
 
@@ -99,7 +101,7 @@ namespace Network
             }
             catch (SocketException se)
             {
-                OnNetworkError("SocketException: " + se.Message);
+                OnNetworkError(se);
             }
         }
     }

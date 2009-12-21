@@ -49,6 +49,10 @@ namespace ChessLogic
             m_nNumMoves = 0;
             m_nNumMovesSinceLastCapture = 0;
             m_nNumCaptured = 0;
+
+            // reset globals
+            GameData.g_ColorMoving = PColor.White;
+            GameData.g_MoveHistory.Clear();
 			ResetBoard();
             Update();
         }
@@ -86,12 +90,24 @@ namespace ChessLogic
                         GameData.g_CurrentGameState[CurrentSquare].SetPosition(TargetSquare);
                         GameData.g_CurrentGameState[TargetSquare] = GameData.g_CurrentGameState[CurrentSquare];
                         GameData.g_CurrentGameState[CurrentSquare] = null;
+
+                        // store this for 50 move rule
+                        if (GameData.g_CurrentGameState[TargetSquare] != null)
+                        {
+                            m_nNumCaptured++;
+                            m_nNumMovesSinceLastCapture = 0;
+                        }
+                        else
+                            m_nNumMovesSinceLastCapture++;
                     }
 
                     // store last move
                     GameData.g_LastMove.ColorMoved = GameData.g_CurrentGameState[TargetSquare].GetColor();
                     GameData.g_LastMove.FromSquare = CurrentSquare;
                     GameData.g_LastMove.ToSquare = TargetSquare;
+
+                    // store move history
+                    GameData.g_MoveHistory.Add(GameData.g_LastMove);
 
                     // update the pieces
                     Update();

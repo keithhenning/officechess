@@ -21,7 +21,7 @@ namespace Network
         protected byte[]        m_LastReceivedData = new byte[MAX_PACKET_SIZE];
 
         // EVENTS  ///////////////////////////////////////////////////////////////////////////////
-        public delegate void NotifyNetworkError(String errorMsg);
+        public delegate void NotifyNetworkError(Exception e);
         public NotifyNetworkError OnNetworkError;
         
         // METHODS ///////////////////////////////////////////////////////////////////////////////
