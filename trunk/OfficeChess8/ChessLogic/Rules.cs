@@ -64,7 +64,7 @@ namespace ChessLogic
 
             // checks to see if the piece on the current square can move to the destination square
 			if (GameData.g_CurrentGameState[CurrentSquare] != null)
-				bCanMove = GameData.g_CurrentGameState[CurrentSquare].CanMoveTo(TargetSquare);
+				bCanMove = GameData.g_CurrentGameState[CurrentSquare].CanMoveTo(TargetSquare) && !IsChecked(GameData.g_CurrentGameState[CurrentSquare].GetColor());
 
             return bCanMove;
         }
@@ -434,6 +434,43 @@ namespace ChessLogic
                         return true;
                     }
                 }
+            }
+
+            return false;
+        }
+
+        protected bool IsChecked(PColor colorToCheck)
+        {
+            int indexOfKing = 0;
+
+            // find king piece
+            for (; indexOfKing < GameData.g_CurrentGameState.Length; indexOfKing++)
+            {
+                if (GameData.g_CurrentGameState[indexOfKing] != null)
+                {
+                    if (colorToCheck == PColor.Black)
+                    {
+                        if (GameData.g_CurrentGameState[indexOfKing].GetPieceType() == PType.BlackKing)
+                            break;
+                    }
+                    else if (colorToCheck == PColor.White)
+                    {
+                        if (GameData.g_CurrentGameState[indexOfKing].GetPieceType() == PType.WhiteKing)
+                            break;
+                    }
+                }
+            }
+
+            // see if it's being attacked
+            if (colorToCheck == PColor.Black)
+            {
+                if (GameData.g_SquaresAttackedByWhite.Contains(indexOfKing))
+                    return true;
+            }
+            else if (colorToCheck == PColor.White)
+            {
+                if (GameData.g_SquaresAttackedByBlack.Contains(indexOfKing))
+                    return true;
             }
 
             return false;
