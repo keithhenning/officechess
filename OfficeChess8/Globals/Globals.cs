@@ -257,7 +257,7 @@ namespace Globals
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("ERROR: unable to save file..." + FileName + " " +e.Message );
+				Console.WriteLine("ERROR: unable to save file..." + FileName + " " + e.Message );
                 return false;
 			}
 
