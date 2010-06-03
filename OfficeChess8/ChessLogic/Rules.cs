@@ -64,7 +64,7 @@ namespace ChessLogic
 
             // checks to see if the piece on the current square can move to the destination square
 			if (GameData.g_CurrentGameState[CurrentSquare] != null)
-				bCanMove = GameData.g_CurrentGameState[CurrentSquare].CanMoveTo(TargetSquare) && !IsChecked(GameData.g_CurrentGameState[CurrentSquare].GetColor());
+				bCanMove = GameData.g_CurrentGameState[CurrentSquare].CanMoveTo(TargetSquare);
 
             return bCanMove;
         }
@@ -90,6 +90,27 @@ namespace ChessLogic
                         GameData.g_CurrentGameState[CurrentSquare].SetPosition(TargetSquare);
                         GameData.g_CurrentGameState[TargetSquare] = GameData.g_CurrentGameState[CurrentSquare];
                         GameData.g_CurrentGameState[CurrentSquare] = null;
+
+                        // update the board with new positions
+                        Update();
+
+                        // see if king is checked
+                        bool bIsChecked = IsChecked(GameData.g_CurrentGameState[TargetSquare].GetColor());
+                        
+                        // if checked
+                        if (bIsChecked)
+                        {
+                            // revert move
+                            GameData.g_CurrentGameState[TargetSquare].SetPosition(CurrentSquare);
+                            GameData.g_CurrentGameState[CurrentSquare] = GameData.g_CurrentGameState[TargetSquare];
+                            GameData.g_CurrentGameState[TargetSquare] = null;
+
+                            // update the board with new positions
+                            Update();
+
+                            // stop execution
+                            return false;
+                        }
 
                         // store this for 50 move rule
                         if (GameData.g_CurrentGameState[TargetSquare] != null)
