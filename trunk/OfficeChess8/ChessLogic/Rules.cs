@@ -388,7 +388,7 @@ namespace ChessLogic
                     {
                         // do move
                         GameData.g_CurrentGameState[6] = GameData.g_CurrentGameState[4];
-                        GameData.g_CurrentGameState[4].SetPosition(4);
+                        GameData.g_CurrentGameState[6].SetPosition(6);
                         GameData.g_CurrentGameState[4] = null;
 
                         GameData.g_CurrentGameState[5] = GameData.g_CurrentGameState[7];

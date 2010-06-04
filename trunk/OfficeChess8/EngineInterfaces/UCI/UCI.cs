@@ -26,6 +26,14 @@ namespace EngineInterfaces
         private Process UCI_Engine;
 
         //////////////////////////////////////////////////////////////////////////
+        // Events
+        //////////////////////////////////////////////////////////////////////////
+        #region Events
+        public delegate void NotifyEngineMove(int CurrSquare, int TargetSquare);
+        public NotifyEngineMove EventEngineMove;
+        #endregion
+
+        //////////////////////////////////////////////////////////////////////////
         // Public methods
         //////////////////////////////////////////////////////////////////////////
         #region Public methods
@@ -88,7 +96,7 @@ namespace EngineInterfaces
                 EngineCommand(searchString);
 
                 // think!
-                EngineCommand("go depth 12");
+                EngineCommand("go depth 9");
             }
 
             return true;
@@ -101,7 +109,7 @@ namespace EngineInterfaces
         //////////////////////////////////////////////////////////////////////////
         #region Private methods
 
-        private static void OutputDataReceivedProc(object sendingProcess, DataReceivedEventArgs outLine)
+        private void OutputDataReceivedProc(object sendingProcess, DataReceivedEventArgs outLine)
         {
             if (outLine.Data == null)
                 return;
@@ -114,6 +122,9 @@ namespace EngineInterfaces
                 Int32 From = -1;
                 Int32 To = -1;
                 DeconstructMoveString(bestmove, out From, out To);
+                
+                if (EventEngineMove != null)
+                    EventEngineMove(From, To);
             }
             else if (t.Contains(" pv "))
             {
@@ -125,18 +136,14 @@ namespace EngineInterfaces
             }
         }
 
-        private static bool DeconstructMoveString(String move, out Int32 From, out Int32 To)
+        private bool DeconstructMoveString(String move, out Int32 From, out Int32 To)
         {
-            Int32 result = -1;
-
             if (move.Length == 4)
             {
-      
                 Int32 FromCol = -1;
                 Int32 FromRow = -1;
                 Int32 ToCol = -1;
                 Int32 ToRow = -1;
-
                 String FromColStr = move.Substring(0, 1);
                 String FromRowStr = move.Substring(1, 1);
                 String ToColStr = move.Substring(2, 1);
@@ -205,11 +212,12 @@ namespace EngineInterfaces
 
                 return true;
             }
-
-            From = -1;
-            To = -1;
-
-            return false;
+            else
+            {
+                From = -1;
+                To = -1;
+                return false;
+            }
         }
 
         private String ConstructMoveString()
