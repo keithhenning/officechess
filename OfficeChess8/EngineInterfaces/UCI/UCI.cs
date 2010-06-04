@@ -111,6 +111,9 @@ namespace EngineInterfaces
             {
                 String bestmove = t.Substring(9, 4);
                 Console.WriteLine("Best move: " + bestmove);
+                Int32 From = -1;
+                Int32 To = -1;
+                DeconstructMoveString(bestmove, out From, out To);
             }
             else if (t.Contains(" pv "))
             {
@@ -120,6 +123,93 @@ namespace EngineInterfaces
                 considerering = considerering.Substring(idxofline, length - idxofline);
                 Console.WriteLine(" Considering line: " + considerering);
             }
+        }
+
+        private static bool DeconstructMoveString(String move, out Int32 From, out Int32 To)
+        {
+            Int32 result = -1;
+
+            if (move.Length == 4)
+            {
+      
+                Int32 FromCol = -1;
+                Int32 FromRow = -1;
+                Int32 ToCol = -1;
+                Int32 ToRow = -1;
+
+                String FromColStr = move.Substring(0, 1);
+                String FromRowStr = move.Substring(1, 1);
+                String ToColStr = move.Substring(2, 1);
+                String ToRowStr = move.Substring(3, 1);
+
+                switch (FromColStr)
+                {
+                    case "a":
+                        FromCol = 0;
+                        break;
+                    case "b":
+                        FromCol = 1;
+                        break;
+                    case "c":
+                        FromCol = 2;
+                        break;
+                    case "d":
+                        FromCol = 3;
+                        break;
+                    case "e":
+                        FromCol = 4;
+                        break;
+                    case "f":
+                        FromCol = 5;
+                        break;
+                    case "g":
+                        FromCol = 6;
+                        break;
+                    case "h":
+                        FromCol = 7;
+                        break;
+                }
+                FromRow = Int32.Parse(FromRowStr) - 1;
+
+                switch (ToColStr)
+                {
+                    case "a":
+                        ToCol = 0;
+                        break;
+                    case "b":
+                        ToCol = 1;
+                        break;
+                    case "c":
+                        ToCol = 2;
+                        break;
+                    case "d":
+                        ToCol = 3;
+                        break;
+                    case "e":
+                        ToCol = 4;
+                        break;
+                    case "f":
+                        ToCol = 5;
+                        break;
+                    case "g":
+                        ToCol = 6;
+                        break;
+                    case "h":
+                        ToCol = 7;
+                        break;
+                }
+                ToRow = Int32.Parse(ToRowStr) - 1;
+
+                Etc.GetSquareFromRowCol(FromRow, FromCol, out From);
+                Etc.GetSquareFromRowCol(ToRow, ToCol, out To);
+
+                return true;
+            }
+
+            From = -1;
+            To = -1;
+
+            return false;
         }
 
         private String ConstructMoveString()
