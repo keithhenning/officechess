@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using Globals;
 using Network;
+using EngineInterfaces;
 
 namespace OfficeChess8
 {
@@ -15,6 +16,8 @@ namespace OfficeChess8
         public static Network.Server m_Server = new Network.Server();
         public static Network.Client m_Client = new Network.Client();
         private bool m_bNetworkGame = false;
+
+        EngineInterfaces.UCI engInt = new EngineInterfaces.UCI();
 
 		public Form1()
 		{
@@ -273,6 +276,8 @@ namespace OfficeChess8
                     string to = Etc.SquareToString(TargetSquare);
                     notifyIcon1.ShowBalloonTip(1, "OfficeChess", "A move was made from " + from + " to " + to, ToolTipIcon.Info);
                 }
+
+                engInt.CalculateBestMove();
             }
 		}
 
@@ -283,6 +288,9 @@ namespace OfficeChess8
         {
             // stop listening
             m_Server.Stop();
+
+            // shutdown engine
+            engInt.ShutdownEngine();
 
             // exit
             Application.Exit();
@@ -360,6 +368,8 @@ namespace OfficeChess8
             nwpack.m_ConnectionID = GameData.g_ConnectionID;
 
             m_Client.Send(nwpack);
+
+            engInt.ResetEngine();
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -384,6 +394,25 @@ namespace OfficeChess8
             m_Client.Send(nwpack);
 
             // TODO: build timer for connection request time-out
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            engInt.InitEngine(textBox1.Text, "");
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // stop listening
+            m_Server.Stop();
+
+            // shutdown engine
+            engInt.ShutdownEngine();
         }
 	}
 }
