@@ -19,9 +19,16 @@ namespace OfficeChess8
 
         EngineInterfaces.UCI engInt = new EngineInterfaces.UCI();
 
+        public void EngineMadeMove(Int32 From, Int32 To)
+        {
+            Chessboard_OnMoveMade(From, To);
+            this.Chessboard.Invalidate();
+        }
+
 		public Form1()
 		{
 			InitializeComponent();
+            engInt.EventEngineMove += EngineMadeMove;
 		}
 
         //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -236,9 +243,9 @@ namespace OfficeChess8
         // update our status bar
         private void Chessboard_MouseMove(object sender, MouseEventArgs e)
         {
-            int curCol = Etc.Clamp(this.Chessboard.GetMouseColPosition(), 0, 7)     + 1;
-            int curRow = Etc.Clamp(this.Chessboard.GetMouseRowPosition(), 0, 7)     + 1;
-            int curSqu = Etc.Clamp(this.Chessboard.GetMouseSquarePosition(), 0, 63) + 1;
+            int curCol = Etc.Clamp(this.Chessboard.GetMouseColPosition(), 0, 7)     /*+ 1*/;
+            int curRow = Etc.Clamp(this.Chessboard.GetMouseRowPosition(), 0, 7)     /*+ 1*/;
+            int curSqu = Etc.Clamp(this.Chessboard.GetMouseSquarePosition(), 0, 63) /*+ 1*/;
 
             this.toolStripStatusLabel1.Text = "Column: " + curCol.ToString() + " row: " + curRow.ToString() + " square: " + curSqu.ToString();
         }
@@ -304,6 +311,7 @@ namespace OfficeChess8
         private void loadGameToolStripMenuItem_Click(object sender, EventArgs e)
         {
             GameData.LoadFromFile("savegame.ocs");
+            this.Chessboard.Update();
         }
 
         private void newGameToolStripMenuItem_Click(object sender, EventArgs e)
