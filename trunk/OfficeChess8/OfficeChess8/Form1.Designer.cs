@@ -32,9 +32,12 @@ namespace OfficeChess8
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.newGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.newGameToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.saveGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.newGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.networkToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.quitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showAttackedSquaresToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -54,10 +57,9 @@ namespace OfficeChess8
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
-            this.newGameToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.networkToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.saveSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Chessboard = new ChessboardControl.Chessboard();
+            this.button4 = new System.Windows.Forms.Button();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
@@ -84,8 +86,29 @@ namespace OfficeChess8
             this.newGameToolStripMenuItem,
             this.quitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(35, 20);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
+            // 
+            // newGameToolStripMenuItem1
+            // 
+            this.newGameToolStripMenuItem1.Name = "newGameToolStripMenuItem1";
+            this.newGameToolStripMenuItem1.Size = new System.Drawing.Size(154, 22);
+            this.newGameToolStripMenuItem1.Text = "New game...";
+            this.newGameToolStripMenuItem1.Click += new System.EventHandler(this.newGameToolStripMenuItem1_Click);
+            // 
+            // saveGameToolStripMenuItem
+            // 
+            this.saveGameToolStripMenuItem.Name = "saveGameToolStripMenuItem";
+            this.saveGameToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
+            this.saveGameToolStripMenuItem.Text = "Save game";
+            this.saveGameToolStripMenuItem.Click += new System.EventHandler(this.saveGameToolStripMenuItem_Click);
+            // 
+            // loadGameToolStripMenuItem
+            // 
+            this.loadGameToolStripMenuItem.Name = "loadGameToolStripMenuItem";
+            this.loadGameToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
+            this.loadGameToolStripMenuItem.Text = "Load last game";
+            this.loadGameToolStripMenuItem.Click += new System.EventHandler(this.loadGameToolStripMenuItem_Click);
             // 
             // newGameToolStripMenuItem
             // 
@@ -93,28 +116,27 @@ namespace OfficeChess8
             this.networkToolStripMenuItem,
             this.saveSettingsToolStripMenuItem});
             this.newGameToolStripMenuItem.Name = "newGameToolStripMenuItem";
-            this.newGameToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
+            this.newGameToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
             this.newGameToolStripMenuItem.Text = "Settings";
             this.newGameToolStripMenuItem.Click += new System.EventHandler(this.newGameToolStripMenuItem_Click);
             // 
-            // saveGameToolStripMenuItem
+            // networkToolStripMenuItem
             // 
-            this.saveGameToolStripMenuItem.Name = "saveGameToolStripMenuItem";
-            this.saveGameToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
-            this.saveGameToolStripMenuItem.Text = "Save game";
-            this.saveGameToolStripMenuItem.Click += new System.EventHandler(this.saveGameToolStripMenuItem_Click);
+            this.networkToolStripMenuItem.Name = "networkToolStripMenuItem";
+            this.networkToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
+            this.networkToolStripMenuItem.Text = "Network";
+            this.networkToolStripMenuItem.Click += new System.EventHandler(this.networkToolStripMenuItem_Click);
             // 
-            // loadGameToolStripMenuItem
+            // saveSettingsToolStripMenuItem
             // 
-            this.loadGameToolStripMenuItem.Name = "loadGameToolStripMenuItem";
-            this.loadGameToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
-            this.loadGameToolStripMenuItem.Text = "Load last game";
-            this.loadGameToolStripMenuItem.Click += new System.EventHandler(this.loadGameToolStripMenuItem_Click);
+            this.saveSettingsToolStripMenuItem.Name = "saveSettingsToolStripMenuItem";
+            this.saveSettingsToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
+            this.saveSettingsToolStripMenuItem.Text = "Save settings";
             // 
             // quitToolStripMenuItem
             // 
             this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
-            this.quitToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
+            this.quitToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
             this.quitToolStripMenuItem.Text = "Quit";
             this.quitToolStripMenuItem.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
             // 
@@ -127,7 +149,7 @@ namespace OfficeChess8
             this.offerDrawToolStripMenuItem,
             this.takeBackMoveToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(56, 20);
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.optionsToolStripMenuItem.Text = "Options";
             // 
             // showAttackedSquaresToolStripMenuItem
@@ -136,7 +158,7 @@ namespace OfficeChess8
             this.showAttackedSquaresToolStripMenuItem.CheckOnClick = true;
             this.showAttackedSquaresToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.showAttackedSquaresToolStripMenuItem.Name = "showAttackedSquaresToolStripMenuItem";
-            this.showAttackedSquaresToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.showAttackedSquaresToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             this.showAttackedSquaresToolStripMenuItem.Text = "Show attacked squares";
             this.showAttackedSquaresToolStripMenuItem.Click += new System.EventHandler(this.showAttackedSquaresToolStripMenuItem_Click);
             // 
@@ -146,28 +168,28 @@ namespace OfficeChess8
             this.showValidMovesToolStripMenuItem.CheckOnClick = true;
             this.showValidMovesToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.showValidMovesToolStripMenuItem.Name = "showValidMovesToolStripMenuItem";
-            this.showValidMovesToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.showValidMovesToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             this.showValidMovesToolStripMenuItem.Text = "Show valid moves";
             this.showValidMovesToolStripMenuItem.Click += new System.EventHandler(this.showValidMovesToolStripMenuItem_Click);
             // 
             // resignToolStripMenuItem
             // 
             this.resignToolStripMenuItem.Name = "resignToolStripMenuItem";
-            this.resignToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.resignToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             this.resignToolStripMenuItem.Text = "Resign";
             this.resignToolStripMenuItem.Click += new System.EventHandler(this.resignToolStripMenuItem_Click);
             // 
             // offerDrawToolStripMenuItem
             // 
             this.offerDrawToolStripMenuItem.Name = "offerDrawToolStripMenuItem";
-            this.offerDrawToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.offerDrawToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             this.offerDrawToolStripMenuItem.Text = "Offer draw";
             this.offerDrawToolStripMenuItem.Click += new System.EventHandler(this.offerDrawToolStripMenuItem_Click);
             // 
             // takeBackMoveToolStripMenuItem
             // 
             this.takeBackMoveToolStripMenuItem.Name = "takeBackMoveToolStripMenuItem";
-            this.takeBackMoveToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.takeBackMoveToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             this.takeBackMoveToolStripMenuItem.Text = "Take back move";
             this.takeBackMoveToolStripMenuItem.Click += new System.EventHandler(this.takeBackMoveToolStripMenuItem_Click);
             // 
@@ -177,19 +199,19 @@ namespace OfficeChess8
             this.helpToolStripMenuItem,
             this.aboutToolStripMenuItem1});
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(48, 20);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(52, 20);
             this.aboutToolStripMenuItem.Text = "About";
             // 
             // helpToolStripMenuItem
             // 
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            this.helpToolStripMenuItem.Size = new System.Drawing.Size(126, 22);
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
             this.helpToolStripMenuItem.Text = "Help";
             // 
             // aboutToolStripMenuItem1
             // 
             this.aboutToolStripMenuItem1.Name = "aboutToolStripMenuItem1";
-            this.aboutToolStripMenuItem1.Size = new System.Drawing.Size(126, 22);
+            this.aboutToolStripMenuItem1.Size = new System.Drawing.Size(116, 22);
             this.aboutToolStripMenuItem1.Text = "About...";
             // 
             // statusStrip1
@@ -205,7 +227,7 @@ namespace OfficeChess8
             // toolStripStatusLabel1
             // 
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(55, 17);
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(57, 17);
             this.toolStripStatusLabel1.Text = "Waiting...";
             // 
             // button1
@@ -255,41 +277,21 @@ namespace OfficeChess8
             this.toolStripMenuItem1,
             this.toolStripMenuItem2});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(124, 48);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(114, 48);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(123, 22);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(113, 22);
             this.toolStripMenuItem1.Text = "Restore";
             this.toolStripMenuItem1.Click += new System.EventHandler(this.toolStripMenuItem1_Click);
             // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(123, 22);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(113, 22);
             this.toolStripMenuItem2.Text = "Close";
             this.toolStripMenuItem2.Click += new System.EventHandler(this.toolStripMenuItem2_Click);
-            // 
-            // newGameToolStripMenuItem1
-            // 
-            this.newGameToolStripMenuItem1.Name = "newGameToolStripMenuItem1";
-            this.newGameToolStripMenuItem1.Size = new System.Drawing.Size(157, 22);
-            this.newGameToolStripMenuItem1.Text = "New game...";
-            this.newGameToolStripMenuItem1.Click += new System.EventHandler(this.newGameToolStripMenuItem1_Click);
-            // 
-            // networkToolStripMenuItem
-            // 
-            this.networkToolStripMenuItem.Name = "networkToolStripMenuItem";
-            this.networkToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
-            this.networkToolStripMenuItem.Text = "Network";
-            this.networkToolStripMenuItem.Click += new System.EventHandler(this.networkToolStripMenuItem_Click);
-            // 
-            // saveSettingsToolStripMenuItem
-            // 
-            this.saveSettingsToolStripMenuItem.Name = "saveSettingsToolStripMenuItem";
-            this.saveSettingsToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
-            this.saveSettingsToolStripMenuItem.Text = "Save settings";
             // 
             // Chessboard
             // 
@@ -301,11 +303,31 @@ namespace OfficeChess8
             this.Chessboard.Load += new System.EventHandler(this.Chessboard_Load);
             this.Chessboard.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Chessboard_MouseMove);
             // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(553, 157);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(230, 23);
+            this.button4.TabIndex = 8;
+            this.button4.Text = "Start UCI engine";
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(553, 131);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(230, 20);
+            this.textBox1.TabIndex = 9;
+            this.textBox1.Text = "D:\\SVN\\OfficeChess_Trunk\\OfficeChess8\\UCIENGINES\\Rybka.exe";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(795, 574);
+            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.button4);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.button3);
             this.Controls.Add(this.statusStrip1);
@@ -315,6 +337,8 @@ namespace OfficeChess8
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
             this.Text = "OfficeChess";
+            this.Load += new System.EventHandler(this.Form1_Load);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Resize += new System.EventHandler(this.Form1_Resize);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
@@ -358,6 +382,8 @@ namespace OfficeChess8
         private System.Windows.Forms.ToolStripMenuItem newGameToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem networkToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveSettingsToolStripMenuItem;
+        private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.TextBox textBox1;
 
 	}
 }

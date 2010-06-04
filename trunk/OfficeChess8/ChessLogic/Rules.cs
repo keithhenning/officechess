@@ -128,7 +128,11 @@ namespace ChessLogic
                     GameData.g_LastMove.ToSquare = TargetSquare;
 
                     // store move history
-                    GameData.g_MoveHistory.Add(GameData.g_LastMove);
+                    AMove lastMove = new AMove();
+                    lastMove.ColorMoved = GameData.g_LastMove.ColorMoved;
+                    lastMove.FromSquare = GameData.g_LastMove.FromSquare;
+                    lastMove.ToSquare = GameData.g_LastMove.ToSquare;
+                    GameData.g_MoveHistory.Add(lastMove);
 
                     // update the pieces
                     Update();
