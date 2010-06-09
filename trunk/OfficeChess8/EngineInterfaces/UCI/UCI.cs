@@ -84,7 +84,7 @@ namespace EngineInterfaces
 
         public bool CalculateBestMove( /*out Int32 From, out Int32 To*/ )
         {
-            if (UCI_Engine != null )
+            if ( UCI_Engine != null )
             {
                 // setup engine board string
                 String searchString = kStartMovesFromStartPos + ConstructMoveString();
@@ -96,7 +96,7 @@ namespace EngineInterfaces
                 EngineCommand(searchString);
 
                 // think!
-                EngineCommand("go depth 9");
+                EngineCommand("go depth 11");
             }
 
             return true;
