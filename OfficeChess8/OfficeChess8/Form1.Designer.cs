@@ -60,6 +60,7 @@ namespace OfficeChess8
             this.Chessboard = new ChessboardControl.Chessboard();
             this.button4 = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
+            this.button5 = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
@@ -321,11 +322,22 @@ namespace OfficeChess8
             this.textBox1.TabIndex = 9;
             this.textBox1.Text = "D:\\SVN\\OfficeChess_Trunk\\OfficeChess8\\UCIENGINES\\Rybka.exe";
             // 
+            // button5
+            // 
+            this.button5.Location = new System.Drawing.Point(553, 85);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(117, 23);
+            this.button5.TabIndex = 10;
+            this.button5.Text = "Force update";
+            this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(795, 574);
+            this.Controls.Add(this.button5);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.button2);
@@ -384,6 +396,7 @@ namespace OfficeChess8
         private System.Windows.Forms.ToolStripMenuItem saveSettingsToolStripMenuItem;
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Button button5;
 
 	}
 }

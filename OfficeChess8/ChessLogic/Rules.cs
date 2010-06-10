@@ -69,6 +69,19 @@ namespace ChessLogic
             return bCanMove;
         }
 
+        public bool TakeBackLastMove()
+        {
+            // revert move
+            GameData.g_CurrentGameState[GameData.g_LastMove.FromSquare] = GameData.g_CurrentGameState[GameData.g_LastMove.ToSquare];
+            GameData.g_CurrentGameState[GameData.g_LastMove.ToSquare] = null;
+            GameData.g_CurrentGameState[GameData.g_LastMove.FromSquare].SetPosition(GameData.g_LastMove.FromSquare);
+
+            // update the board with new positions
+            Update();
+
+            return true;
+        }
+
         // does the actual move and updates all necessary information
         public bool DoMove(int CurrentSquare, int TargetSquare)
         {
@@ -87,9 +100,9 @@ namespace ChessLogic
                     if (!TryCastling(CurrentSquare, TargetSquare) && !TryEnPassant(CurrentSquare, TargetSquare))
                     {
                         // if not, do normal move
-                        GameData.g_CurrentGameState[CurrentSquare].SetPosition(TargetSquare);
                         GameData.g_CurrentGameState[TargetSquare] = GameData.g_CurrentGameState[CurrentSquare];
                         GameData.g_CurrentGameState[CurrentSquare] = null;
+                        GameData.g_CurrentGameState[TargetSquare].SetPosition(TargetSquare);
 
                         // update the board with new positions
                         Update();
@@ -101,9 +114,9 @@ namespace ChessLogic
                         if (bIsChecked)
                         {
                             // revert move
-                            GameData.g_CurrentGameState[TargetSquare].SetPosition(CurrentSquare);
                             GameData.g_CurrentGameState[CurrentSquare] = GameData.g_CurrentGameState[TargetSquare];
                             GameData.g_CurrentGameState[TargetSquare] = null;
+                            GameData.g_CurrentGameState[CurrentSquare].SetPosition(CurrentSquare);
 
                             // update the board with new positions
                             Update();
@@ -163,7 +176,7 @@ namespace ChessLogic
 		#region Private / protected methods
 
         // iterates through all pieces and lets them update
-        protected void Update()
+        public void Update()
         {
 			UpdatePieces();
 			UpdateAttackedSquares();
@@ -445,8 +458,8 @@ namespace ChessLogic
                     {
                         GameData.g_CurrentGameState[TargetSquare-8] = null;
                         GameData.g_CurrentGameState[CurrentSquare] = null;
-                        CurrentPiece.SetPosition(TargetSquare);
                         GameData.g_CurrentGameState[TargetSquare] = CurrentPiece;
+                        CurrentPiece.SetPosition(TargetSquare);
                         return true;
                     }
                     // do move
@@ -454,8 +467,8 @@ namespace ChessLogic
                     {
                         GameData.g_CurrentGameState[TargetSquare + 8] = null;
                         GameData.g_CurrentGameState[CurrentSquare] = null;
-                        CurrentPiece.SetPosition(TargetSquare);
                         GameData.g_CurrentGameState[TargetSquare] = CurrentPiece;
+                        CurrentPiece.SetPosition(TargetSquare);
                         return true;
                     }
                 }
