@@ -363,6 +363,7 @@ namespace OfficeChess8
             nwpack.m_ConnectionID = GameData.g_ConnectionID;
 
             m_Client.Send(nwpack);
+            this.ChessRules.TakeBackLastMove();
         }
 
 
@@ -421,6 +422,11 @@ namespace OfficeChess8
 
             // shutdown engine
             engInt.ShutdownEngine();
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            this.ChessRules.Update();
         }
 	}
 }
